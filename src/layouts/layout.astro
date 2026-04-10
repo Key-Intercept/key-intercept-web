@@ -1,0 +1,22 @@
+---
+const { title } = Astro.props;
+import kiheader from "../components/kiheader.astro";
+import kifooter from "../components/kifooter.astro";
+---
+
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width" />
+        <meta name="generator" content={Astro.generator} />
+        <title>{title} | Key Intercept</title>
+    </head>
+
+    <body>
+        <kiheader title={title}></kiheader>
+        <main>
+            <slot />
+        </main>
+        <kifooter></kifooter>
+    </body>
+</html>

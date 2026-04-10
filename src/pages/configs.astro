@@ -1,0 +1,22 @@
+---
+const title = "Configs";
+import Layout from "../layouts/layout.astro";
+import Card from "../components/card.astro";
+import ConfigSelect from "../components/config-select.jsx";
+
+
+function configSelected() {
+    const select = document.getElementById("config-select");
+    const selectedConfig = select!.value;
+    if (selectedConfig) {
+        window.location.href = `/main?config=${selectedConfig}`;
+    }
+}
+---
+
+<Layout title={title}>
+    <Card title={title} buttonLabel="Select Config" buttonCode={configSelected}>
+        <ConfigSelect client:load/>
+    </Card>
+    </Card>
+</Layout>

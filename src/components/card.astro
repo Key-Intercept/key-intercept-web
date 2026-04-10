@@ -1,0 +1,13 @@
+---
+const { title, buttonLabel, buttonCode } = Astro.props;
+---
+
+<div>
+    <div>
+        <div>
+            {title}
+        </div>
+        <button onclick={buttonCode}>{buttonLabel}</button>
+    </div>
+    <slot />
+</div>
