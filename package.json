@@ -12,7 +12,17 @@
     "astro": "astro"
   },
   "dependencies": {
+    "@astrojs/check": "^0.9.8",
+    "@astrojs/mdx": "^5.0.3",
+    "@astrojs/react": "^5.0.3",
+    "@astrojs/vercel": "^10.0.4",
+    "@supabase/supabase-js": "^2.103.0",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
     "astro": "^6.1.4",
-    "supabase": "^2.87.2"
+    "react": "^19.2.5",
+    "react-dom": "^19.2.5",
+    "react-router": "^7.14.0",
+    "typescript": "^5.9.3"
   }
 }

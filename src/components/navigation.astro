@@ -1,0 +1,95 @@
+---
+const routes = [
+    {
+        name: "Rules",
+        path: "/main",
+    },
+    {
+        name: "Pet",
+        path: "/pet",
+    },
+    {
+        name: "Bimbo",
+        path: "/bimbo",
+    },
+    {
+        name: "Drone",
+        path: "/drone",
+    },
+    {
+        name: "Wiki",
+        path: "/wiki",
+    },
+];
+
+const { title } = Astro.props;
+const configID = Astro.url.searchParams.get("config");
+---
+
+<nav>
+    <ul>
+        {
+            routes.map((route) => (
+                <li>
+                    <a class="nav-link" href={route.path + "?config=" + configID}>
+                        {route.name}
+                        <svg
+                            width="100%"
+                            height="10"
+                            xmlns="http://www.w3.org/2000/svg"
+                        >
+                            <line
+                                x1="0"
+                                y1="5"
+                                x2="100%"
+                                y2="5"
+                                stroke={title === route.name ? "#400bba" : "white"}
+                                stroke-width="2"
+                            />
+                        </svg>
+                    </a>
+                </li>
+            ))
+        }
+    </ul>
+</nav>
+
+<style>
+    nav {
+        padding-top: 1rem;
+        padding-bottom: 1rem;
+    }
+
+    nav ul {
+        list-style: none;
+        display: flex;
+        text-align: center;
+        justify-content: space-around;
+        margin: 0;
+        padding: 0;
+    }
+
+    nav ul li a {
+        color: #fff;
+        text-decoration: none;
+        font-family: "Major Mono Display", monospace;
+        font-weight: 400;
+        font-style: normal;
+    }
+
+    .nav-link {
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        width: 100%;
+    }
+
+    li {
+        width: 20vw;
+    }
+    
+
+    nav ul li a:hover {
+        text-decoration: underline;
+    }
+</style>

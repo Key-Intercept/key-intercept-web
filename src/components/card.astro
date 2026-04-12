@@ -1,13 +1,68 @@
 ---
-const { title, buttonLabel, buttonCode } = Astro.props;
+const { title } = Astro.props;
 ---
 
-<div>
-    <div>
-        <div>
+<div class="card-positioner">
+    <div class="card-container">
+        <div class="card-title">
             {title}
         </div>
-        <button onclick={buttonCode}>{buttonLabel}</button>
+        <slot />
     </div>
-    <slot />
 </div>
+
+<style>
+    .card-positioner {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100%;
+        width: 100vw;
+        margin-top: 10vh;
+        margin-bottom: 10vh;
+    }
+
+    .card-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        background-color: #1e1e1e;
+        padding: 2rem;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        border-radius: 30px;
+        border-width: 2px;
+        border-color: #eee;
+        border-style: solid;
+        color: #eee;
+    }
+
+    .card-title {
+        font-size: 4rem;
+        margin-bottom: 1rem;
+        text-align: center;
+        font-family: "Jersey 10", sans-serif;
+        font-weight: 400;
+        font-style: normal;
+    }
+
+
+    button {
+        padding: 0.5rem 1rem;
+        font-size: 1.2rem;
+        background-color: #eee;
+        color: #1e1e1e;
+        border: none;
+        border-radius: 30px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+        font-family: "Major Mono Display", monospace;
+        font-weight: 400;
+        font-style: normal;
+    }
+
+    button:hover {
+        background-color: #222;
+        color: #ddd;
+    }
+</style>

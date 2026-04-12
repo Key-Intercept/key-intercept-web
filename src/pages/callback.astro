@@ -1,0 +1,69 @@
+---
+const title = "Callback";
+import Layout from "../layouts/layout.astro";
+---
+
+<Layout title={title}>
+    <h1>{title}</h1>
+    <p>Processing authentication...</p>
+</Layout>
+
+<style>
+    h1 {
+        color: #eee;
+        font-size: 2rem;
+        margin-bottom: 1rem;
+    }
+
+    p {
+        font-size: 1.25rem;
+        color: #eee;
+    }
+</style>
+
+<script>
+    window.onload = async () => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const exisitingSession = urlParams.get("ki-session");
+        if (exisitingSession) {
+            window.location.href = "/configs";
+        } else {
+            const code = urlParams.get("code");
+
+            if (code) {
+                window.history.replaceState(
+                    {},
+                    document.title,
+                    window.location.pathname,
+                );
+
+                // try {
+                const response = await fetch("/api/discord-login", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({ code }),
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.error || "Login failed");
+                }
+
+                if (data.session_token) {
+                    //store session token and user id in url params and redirect to configs page
+                    urlParams.append("ki-session", data.session_token);
+                    urlParams.append("ki-user", data.user.id);
+                    window.location.href = `/configs?${urlParams.toString()}`;
+                }
+                // } catch (error) {
+                //     console.error("Login error:", error);
+                //     alert("Login failed. Please try again.");
+                //     window.location.href = "/";
+                // }
+            }
+        }
+    };
+</script>

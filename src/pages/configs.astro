@@ -1,22 +1,32 @@
 ---
 const title = "Configs";
+export const prerender = false;
 import Layout from "../layouts/layout.astro";
 import Card from "../components/card.astro";
-import ConfigSelect from "../components/config-select.jsx";
+import ConfigSelect from "../components/config-select.tsx";
 
-
-function configSelected() {
-    const select = document.getElementById("config-select");
-    const selectedConfig = select!.value;
-    if (selectedConfig) {
-        window.location.href = `/main?config=${selectedConfig}`;
-    }
-}
+const searchParams = Astro.url.searchParams;
+const discordID = searchParams.get("ki-user");
 ---
 
 <Layout title={title}>
-    <Card title={title} buttonLabel="Select Config" buttonCode={configSelected}>
-        <ConfigSelect client:load/>
-    </Card>
+    <Card title={title}>
+        {discordID ? (
+            <ConfigSelect discordID={discordID} />
+        ) : (
+            <p>Missing Discord user id in the request.</p>
+        )}
     </Card>
 </Layout>
+
+<script>
+    const select = document.getElementById("config-select");
+    if (select instanceof HTMLSelectElement) {
+        select.addEventListener("change", () => {
+            const selectedConfig = select.value;
+            if (selectedConfig) {
+                window.location.href = `/main?config=${selectedConfig}`;
+            }
+        });
+    }
+</script>

@@ -2,11 +2,56 @@
 
 ---
 
+<svg width="100%" height="10" xmlns="http://www.w3.org/2000/svg">
+    <line x1="0" y1="5" x2="100%" y2="5" stroke="white" stroke-width="2"></line>
+</svg>
 <footer>
     <p>
         Made by <a href="https://discord.com" target="_blank">supersliser</a> on Discord.
     </p>
     <p>
-        View the full repository on <a href="https://github.com/Key-Intercept/key-intercept" target="_blank">GitHub</a>.
+        View the full repository on <a
+            href="https://github.com/Key-Intercept/key-intercept"
+            target="_blank">GitHub</a
+        >.
     </p>
+    <p>Things I use in this project:</p>
+    <ul>
+        <li><a href="https://astro.build">Astro (for the site)</a></li>
+        <li><a href="https://vencord.dev/">Vencord (for the PC app)</a></li>
+        <li><a href="https://aliucord.com/">Aliucord (for the mobile app)</a></li>
+        <li><a href="https://netcord.dev/">Netcord (for the bot)</a></li>
+        <li><a href="https://supabase.com/">Supabase (for the backend database)</a></li>
+    </ul>
 </footer>
+
+<style>
+    footer {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 1rem;
+        color: #eee;
+        width: 100vw;
+    }
+
+    footer p {
+        margin: 0.5rem 0;
+    }
+
+    footer a {
+        color: #eee;
+        text-decoration: none;
+        font-weight: bold;
+    }
+
+    footer a:hover {
+        text-decoration: underline;
+    }
+
+    footer li {
+        list-style: none;
+        font-weight: 400;
+    }
+</style>

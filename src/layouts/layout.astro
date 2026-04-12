@@ -1,7 +1,7 @@
 ---
 const { title } = Astro.props;
-import kiheader from "../components/kiheader.astro";
-import kifooter from "../components/kifooter.astro";
+import Kiheader from "../components/kiheader.astro";
+import Kifooter from "../components/kifooter.astro";
 ---
 
 <html lang="en">
@@ -9,14 +9,20 @@ import kifooter from "../components/kifooter.astro";
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width" />
         <meta name="generator" content={Astro.generator} />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Jersey+10&display=swap"
+            rel="stylesheet"
+        />
         <title>{title} | Key Intercept</title>
     </head>
 
-    <body>
-        <kiheader title={title}></kiheader>
+    <body style="background-color: #111;">
+        <Kiheader title={title} />
         <main>
             <slot />
         </main>
-        <kifooter></kifooter>
+        <Kifooter />
     </body>
 </html>
