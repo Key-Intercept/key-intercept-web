@@ -1,0 +1,6 @@
+[submodule "key-intercept.wiki"]
+	path = key-intercept.wiki
+	url = git@github.com:Key-Intercept/key-intercept.wiki
+[submodule "src/data/wiki"]
+	path = src/data/wiki
+	url = git@github.com:Key-Intercept/key-intercept.wiki
