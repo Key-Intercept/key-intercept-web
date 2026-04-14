@@ -3,32 +3,51 @@ import errorOccurred from './reactError';
 import Card from './card.astro';
 import type { Rule } from '../script/types';
 import RulesListItem from './rules-list-item';
+import { useState } from 'react';
 
-export default async function RulesList({ configID }: { configID: number }) {
-    const supabase = createClient(import.meta.env.SUPABASE_URL, import.meta.env.SUPABASE_SERVICE_KEY);
+export default async function RulesList({ rules, setRules,selectedRule,  setSelectedRule }: { rules: Rule[], setRules: (rules: Rule[]) => void, selectedRule: Rule, setSelectedRule: (rule: Rule) => void }) {
+    function DeleteRule(id: bigint) {
+        let output: Rule[] = [];
 
-    const { data: rulesData, error } = await supabase
-        .from('Rules')
-        .select('*')
-        .eq('config_id', configID);
+        rules.forEach((a) => {
+            if (a.id != id) {
+                output.push(a)
+            }
+        });
 
-    const rules: Rule[] = rulesData ? rulesData.map((rule) => ({
-        id: rule.id,
-        created_at: new Date(rule.created_at),
-        updated_at: new Date(rule.updated_at),
-        config_id: rule.config_id,
-        rule_regex: new RegExp(rule.rule_regex),
-        rule_replacement: rule.rule_replacement,
-        enabled: rule.enabled,
-        chance_to_apply: rule.chance_to_apply,
-        label: rule.label,
-        order: rule.order,
-    })) : [];
+        setRules(output);
+    }
 
-    if (error) {
-        console.error('[supabase] Error fetching rules:', error);
-        console.error('Config ID:', configID);
-        return errorOccurred("--- Error loading rules ---");
+    function IncrementPriority(id: bigint) {
+        let output = rules;
+        for (let i = 0; i < output.length; i++) {
+            if (output[i].id == id) {
+                output[i].order = output[i - 1] ? output[i - 1].order - 1 : output[i].order - 1;
+            }
+        }
+        output.sort((a, b) => { return a.order - b.order });
+        setRules(output);
+    }
+
+    function DecrementPriority(id: bigint) {
+        let output = rules;
+        for (let i = 0; i < output.length; i++) {
+            if (output[i].id == id) {
+                output[i].order = output[i + 1] ? output[i - 1].order + 1 : output[i].order + 1;
+            }
+        }
+        output.sort((a, b) => { return a.order - b.order });
+        setRules(output);
+    }
+
+    function toggleEnabled(id: bigint) {
+        let output = rules;
+        for (let i = 0; i < output.length; i++) {
+            if (output[i].id == id) {
+                output[i].enabled = false;
+            }
+        }
+        setRules(output);
     }
 
     return <Card title="Rules">
@@ -37,7 +56,7 @@ export default async function RulesList({ configID }: { configID: number }) {
         ) : (
             <ul>
                 {rules.map((rule) => (
-                    RulesListItem({ rule, onDelete: () => console.log('Delete rule with ID:', rule.id) })
+                    <RulesListItem rule={rule} onDelete={DeleteRule} onIncrement={IncrementPriority} onDecrement={DecrementPriority} onToggled={toggleEnabled} />
                 ))}
             </ul>
         )}

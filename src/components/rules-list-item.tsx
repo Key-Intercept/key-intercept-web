@@ -1,15 +1,9 @@
 import type { Rule } from "../script/types";
 import { useState } from "react";
 import RulesListItemButton from "./rules-list-item-button";
+import { canHaveDecorators } from "typescript";
 
-export default function RulesListItem({ rule, onDelete }: { rule: Rule, onDelete: () => void }) {
-
-    const [enabled, setEnabled] = useState(rule.enabled);
-    const [order, setOrder] = useState(rule.order);
-
-    const toggleEnabled = () => {
-        setEnabled(!enabled);
-    };
+export default function RulesListItem({ rule, onDelete, onToggled, onIncrement, onDecrement }: { rule: Rule, onDelete: (id: bigint) => void, onToggled: (id: bigint) => void, onIncrement: (id: bigint) => void, onDecrement: (id: bigint) => void }) {
 
     const containerStyle: React.CSSProperties = {
         display: 'flex',
@@ -43,9 +37,14 @@ export default function RulesListItem({ rule, onDelete }: { rule: Rule, onDelete
         style.backgroundColor = hovered ? 'red' : 'grey';
     }
 
+    const setButtonHover = (hovered: boolean, style: React.CSSProperties) => {
+        style.backgroundColor = hovered ? "lightgray" : 'grey'
+        style.color = hovered ? 'black' : 'white'
+    }
+
     return <div style={containerStyle}>
-        <RulesListItemButton square={true} onPressed={toggleEnabled}>
-            {enabled ? rule.order : 'x'}
+        <RulesListItemButton onHovered={setButtonHover} square={true} onPressed={() => onToggled(rule.id)}>
+            {rule.enabled ? rule.order : 'x'}
         </RulesListItemButton>
         <div style={textContainerStyle}>
             <div style={labelStyle}>
@@ -56,9 +55,9 @@ export default function RulesListItem({ rule, onDelete }: { rule: Rule, onDelete
             </div>
         </div>
         <div>
-            <RulesListItemButton square={true}>↑</RulesListItemButton>
-            <RulesListItemButton square={true}>↓</RulesListItemButton>
-            <RulesListItemButton onHovered={setDeleteHover} square={true} onPressed={onDelete}>
+            <RulesListItemButton onHovered={setButtonHover} square={true} onPressed={() => onIncrement(rule.id)}>↑</RulesListItemButton>
+            <RulesListItemButton onHovered={setButtonHover} square={true} onPressed={() => onDecrement(rule.id)}>↓</RulesListItemButton>
+            <RulesListItemButton onHovered={setDeleteHover} square={true} onPressed={() => onDelete(rule.id)}>
                 x
             </RulesListItemButton>
         </div>

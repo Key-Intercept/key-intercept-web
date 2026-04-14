@@ -1,6 +1,14 @@
 ---
 const title = "Rules";
 import Layout from "../layouts/mainPage.astro";
+import RulesList from "../components/rules-list";
+import Card from "../components/card.astro";
+
+const queryParams = Astro.url.searchParams;
+const configID = parseInt(queryParams.get("config")!)
 ---
 
-<Layout title={title} />
+<Layout title={title}>
+    <Card></Card>
+    <Card><RulesList client:load configID={configID} /></Card>
+</Layout>
