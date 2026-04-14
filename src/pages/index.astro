@@ -2,10 +2,11 @@
 const title = "Login";
 import Layout from "../layouts/layout.astro";
 import Card from "../components/card.astro";
+import Button from "../components/button.astro";
 ---
 
 <Layout title={title}>
-	<Card title={title}><button>Login with Discord</button></Card>
+	<Card title={title}><Button id="login-discord-btn">Login with Discord</Button></Card>
 </Layout>
 
 <script>

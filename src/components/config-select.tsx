@@ -1,6 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
-import type { JSX } from 'astro/jsx-runtime';
-
+import errorOccurred from './reactError';
+import type { JSX } from 'react';
 
 export default async function ConfigSelect({ discordID }: { discordID: string }) {
     const supabase = createClient(import.meta.env.SUPABASE_URL, import.meta.env.SUPABASE_SERVICE_KEY);
@@ -95,8 +95,4 @@ export default async function ConfigSelect({ discordID }: { discordID: string })
         fontWeight: 400, 
         fontStyle: 'normal'
     }}>{renderedOptions}</select>;
-}
-
-function errorOccurred(message: string): JSX.Element {
-    return <select><option value="">{message}</option></select>;
 }
