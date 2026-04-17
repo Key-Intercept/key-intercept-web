@@ -1,4 +1,6 @@
 ---
+import Separator from "./separator";
+
 const routes = [
     {
         name: "Rules",
@@ -18,12 +20,13 @@ const routes = [
     },
     {
         name: "Wiki",
-        path: "/wiki",
+        path: "/wiki/Home",
     },
 ];
 
 const { title } = Astro.props;
-const configID = Astro.url.searchParams.get("config");
+const searchParams = Astro.url.search;
+console.log("Current search params:", searchParams);
 ---
 
 <nav>
@@ -31,22 +34,9 @@ const configID = Astro.url.searchParams.get("config");
         {
             routes.map((route) => (
                 <li>
-                    <a class="nav-link" href={route.path + "?config=" + configID}>
+                    <a class="nav-link" href={route.path + searchParams}>
                         {route.name}
-                        <svg
-                            width="100%"
-                            height="10"
-                            xmlns="http://www.w3.org/2000/svg"
-                        >
-                            <line
-                                x1="0"
-                                y1="5"
-                                x2="100%"
-                                y2="5"
-                                stroke={title === route.name ? "#400bba" : "white"}
-                                stroke-width="2"
-                            />
-                        </svg>
+                        <Separator color={title === route.name ? "#400bba" : "white"} />
                     </a>
                 </li>
             ))

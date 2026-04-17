@@ -11,7 +11,4 @@ import mdx from '@astrojs/mdx';
 export default defineConfig({
   integrations: [react(), mdx()],
   adapter: vercel(),
-  redirects: {
-    '/wiki': 'wiki/Home',
-  }
 });

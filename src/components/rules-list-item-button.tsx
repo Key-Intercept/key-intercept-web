@@ -29,6 +29,8 @@ export default function RulesListItemButton({ onPressed, onHovered, square, chil
         cursor: 'pointer',
         width: square ? '30px' : 'auto',
         height: square ? '30px' : 'auto',
+        marginLeft: '5px',
+        marginRight: '5px',
     };
 
     return <button

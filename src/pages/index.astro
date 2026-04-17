@@ -1,7 +1,7 @@
 ---
 const title = "Login";
 import Layout from "../layouts/layout.astro";
-import Card from "../components/card.astro";
+import Card from "../components/card";
 import Button from "../components/button.astro";
 ---
 
@@ -21,6 +21,7 @@ import Button from "../components/button.astro";
 	const loginButton = document.getElementById("login-discord-btn");
 	if (loginButton) {
 		loginButton.addEventListener("click", () => {
+			console.log("Login button clicked");
 			const params = new URLSearchParams({
 				client_id: CLIENT_ID,
 				redirect_uri: `${window.location.origin}${REDIRECT_PATH}`,

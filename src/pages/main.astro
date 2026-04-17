@@ -1,14 +1,45 @@
 ---
-const title = "Rules";
-import Layout from "../layouts/mainPage.astro";
-import RulesList from "../components/rules-list";
-import Card from "../components/card.astro";
+export const prerender = false;
 
+import Layout from "../layouts/mainPage.astro";
+import Card from "../components/card";
+import RulesPageContainer from "../components/rules-page-container";
+import { createClient } from "@supabase/supabase-js";
+import type { Rule } from "../script/types";
+
+const title = "Rules";
 const queryParams = Astro.url.searchParams;
-const configID = parseInt(queryParams.get("config")!)
+if (!queryParams.has("config") || queryParams.get("config") === null) {
+    return Astro.redirect("/configs");
+}
+const configID = BigInt(queryParams.get("config")!);
+
+const supabaseUrl = import.meta.env.SUPABASE_URL;
+const supabaseKey = import.meta.env.SUPABASE_SERVICE_KEY;
+const supabase = createClient(supabaseUrl, supabaseKey);
+const { data: rulesData, error } = await supabase
+    .from('Rules')
+    .select('*')
+    .eq('config_id', configID);
+
+if (error) {
+    console.error('[supabase] Error fetching rules:', error);
+}
+
+const initialRules = rulesData ? rulesData.map((rule) => ({
+    id: rule.id,
+    created_at: new Date(rule.created_at),
+    updated_at: new Date(rule.updated_at),
+    config_id: rule.config_id,
+    rule_regex: new RegExp(rule.rule_regex),
+    rule_replacement: rule.rule_replacement,
+    enabled: rule.enabled,
+    chance_to_apply: rule.chance_to_apply,
+    label: rule.label,
+    order: rule.order,
+})) : [];
 ---
 
 <Layout title={title}>
-    <Card></Card>
-    <Card><RulesList client:load configID={configID} /></Card>
+    <RulesPageContainer initialRules={initialRules} client:load />
 </Layout>

@@ -1,12 +1,9 @@
-import { createClient } from '@supabase/supabase-js';
-import errorOccurred from './reactError';
-import Card from './card.astro';
+import Card from './card';
 import type { Rule } from '../script/types';
 import RulesListItem from './rules-list-item';
-import { useState } from 'react';
 
-export default async function RulesList({ rules, setRules,selectedRule,  setSelectedRule }: { rules: Rule[], setRules: (rules: Rule[]) => void, selectedRule: Rule, setSelectedRule: (rule: Rule) => void }) {
-    function DeleteRule(id: bigint) {
+export default function RulesList({ rules, setRules, selectedRule, setSelectedRule, updateRule, deleteRule }: { rules: Rule[], setRules: (rules: Rule[]) => void, selectedRule: Rule | null, setSelectedRule: (rule: Rule | null) => void, updateRule: (rule: Rule) => void, deleteRule: (id: bigint) => void }) {
+    async function DeleteRule(id: bigint) {
         let output: Rule[] = [];
 
         rules.forEach((a) => {
@@ -14,40 +11,58 @@ export default async function RulesList({ rules, setRules,selectedRule,  setSele
                 output.push(a)
             }
         });
-
+        await deleteRule(id);
         setRules(output);
+        
     }
 
-    function IncrementPriority(id: bigint) {
-        let output = rules;
+    async function IncrementPriority(id: bigint) {
+        // CREATE A COPY OF THE STATE SO REACT KNOWS TO TRIGGER A RE-RENDER
+        let output = [...rules]; 
+
         for (let i = 0; i < output.length; i++) {
             if (output[i].id == id) {
                 output[i].order = output[i - 1] ? output[i - 1].order - 1 : output[i].order - 1;
             }
         }
         output.sort((a, b) => { return a.order - b.order });
+
+        // Await the API call first, then update local state
+        await updateRule(output.find((a) => a.id == id)!);
         setRules(output);
     }
 
-    function DecrementPriority(id: bigint) {
-        let output = rules;
+    async function DecrementPriority(id: bigint) {
+        let output = [...rules]; // CREATE A COPY
+
         for (let i = 0; i < output.length; i++) {
             if (output[i].id == id) {
-                output[i].order = output[i + 1] ? output[i - 1].order + 1 : output[i].order + 1;
+                output[i].order = output[i + 1] ? output[i + 1].order + 1 : output[i].order + 1;
             }
         }
         output.sort((a, b) => { return a.order - b.order });
+        await updateRule(output.find((a) => a.id == id)!);
         setRules(output);
     }
 
-    function toggleEnabled(id: bigint) {
-        let output = rules;
+    async function toggleEnabled(id: bigint) {
+        let output = [...rules]; // CREATE A COPY
+
         for (let i = 0; i < output.length; i++) {
             if (output[i].id == id) {
-                output[i].enabled = false;
+                output[i].enabled = !output[i].enabled;
             }
         }
+        await updateRule(output.find((a) => a.id == id)!);
         setRules(output);
+    }
+
+    function selectRule(rule: Rule) {
+        if (selectedRule?.id === rule.id) {
+            setSelectedRule(null);
+            return;
+        }
+        setSelectedRule(rule);
     }
 
     return <Card title="Rules">
@@ -56,7 +71,7 @@ export default async function RulesList({ rules, setRules,selectedRule,  setSele
         ) : (
             <ul>
                 {rules.map((rule) => (
-                    <RulesListItem rule={rule} onDelete={DeleteRule} onIncrement={IncrementPriority} onDecrement={DecrementPriority} onToggled={toggleEnabled} />
+                    <RulesListItem key={rule.id} selected={selectedRule?.id === rule.id} onSelected={selectRule} rule={rule} onDelete={DeleteRule} onIncrement={IncrementPriority} onDecrement={DecrementPriority} onToggled={toggleEnabled} />
                 ))}
             </ul>
         )}

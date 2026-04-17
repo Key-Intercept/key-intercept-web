@@ -3,15 +3,23 @@ import { useState } from "react";
 import RulesListItemButton from "./rules-list-item-button";
 import { canHaveDecorators } from "typescript";
 
-export default function RulesListItem({ rule, onDelete, onToggled, onIncrement, onDecrement }: { rule: Rule, onDelete: (id: bigint) => void, onToggled: (id: bigint) => void, onIncrement: (id: bigint) => void, onDecrement: (id: bigint) => void }) {
+export default function RulesListItem({ rule, selected, onDelete, onToggled, onIncrement, onDecrement, onSelected }: { rule: Rule, selected: boolean, onDelete: (id: bigint) => void, onToggled: (id: bigint) => void, onIncrement: (id: bigint) => void, onDecrement: (id: bigint) => void, onSelected: (Rule: Rule) => void }) {
+const [hovered, setHovered] = useState(false);
+
 
     const containerStyle: React.CSSProperties = {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
-        padding: '10px',
-        borderBottom: '1px solid #ccc',
+        padding: `${selected || hovered ? '10px' : '12px'}`,
+        marginBottom: '10px',
+        border: `${selected || hovered ? '2px' : '0px'} solid ${hovered ? '#ccc' : '#7700ff'}`,
+        borderRadius: '20px',
         flexDirection: 'row',
+        gap: '10px',
+        width: '40vw',
+        backgroundColor:'#111111',
+        cursor: 'pointer',
     }
 
     const textContainerStyle: React.CSSProperties = {
@@ -21,16 +29,19 @@ export default function RulesListItem({ rule, onDelete, onToggled, onIncrement, 
         justifyContent: 'center',
         flex: 1,
         marginLeft: '10px',
+        marginRight: '10px',
     }
 
     const labelStyle: React.CSSProperties = {
         fontWeight: 'bold',
         fontSize: '16px',
+        textDecoration: rule.enabled ? 'none' : 'line-through',
     }
 
     const regexStyle: React.CSSProperties = {
         fontStyle: 'italic',
         color: '#555',
+        textDecoration: rule.enabled ? 'none' : 'line-through',
     }
 
     const setDeleteHover = (hovered: boolean, style: React.CSSProperties) => {
@@ -42,7 +53,7 @@ export default function RulesListItem({ rule, onDelete, onToggled, onIncrement, 
         style.color = hovered ? 'black' : 'white'
     }
 
-    return <div style={containerStyle}>
+    return <div style={containerStyle} onClick={() => onSelected(rule)} onMouseEnter={() => setHovered(true)} onMouseLeave={() => setHovered(false)}>
         <RulesListItemButton onHovered={setButtonHover} square={true} onPressed={() => onToggled(rule.id)}>
             {rule.enabled ? rule.order : 'x'}
         </RulesListItemButton>

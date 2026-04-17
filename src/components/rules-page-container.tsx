@@ -1,40 +1,76 @@
-import { createClient } from "@supabase/supabase-js";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import type { Rule } from "../script/types";
-import errorOccurred from "./reactError";
-import Card from "./card.astro";
-import SelectedRule from "./selectedRule";
 import RulesList from "./rules-list";
+import Card from "./card";
+import SelectedRule from "./selectedRule";
 
-export default async function RulesPageContainer({ configID }: { configID: number }) {
-    const supabase = createClient(import.meta.env.SUPABASE_URL, import.meta.env.SUPABASE_SERVICE_KEY);
-    const { data: rulesData, error } = await supabase
-        .from('Rules')
-        .select('*')
-        .eq('config_id', configID);
+export default function RulesPageContainer({ initialRules }: { initialRules: Rule[] }) {
+    const [rules, setRules] = useState(initialRules.sort((a, b) => a.order - b.order));
+    const [selectedRule, setSelectedRule] = useState<Rule | null>(null);
 
-    const rulesDatabase: Rule[] = rulesData ? rulesData.map((rule) => ({
-        id: rule.id,
-        created_at: new Date(rule.created_at),
-        updated_at: new Date(rule.updated_at),
-        config_id: rule.config_id,
-        rule_regex: new RegExp(rule.rule_regex),
-        rule_replacement: rule.rule_replacement,
-        enabled: rule.enabled,
-        chance_to_apply: rule.chance_to_apply,
-        label: rule.label,
-        order: rule.order,
-    })) : [];
+    async function deleteRuleDatabase(id: bigint) {
+        const res = await fetch(`/api/rules?id=${id}`, {
+            method: 'DELETE'
+        });
 
-    if (error) {
-        console.error('[supabase] Error fetching rules:', error);
-        console.error('Config ID:', configID);
-        return errorOccurred("--- Error loading rules ---");
+        if (!res.ok) {
+            console.error("Error deleting rule:", await res.text());
+            await alert("An error occurred while deleting the rule. Please try again.");
+        }
     }
 
-    const [rules, setRules] = useState(rulesDatabase.sort((a, b) => { return a.order - b.order }))
+    async function updateRuleDatabase(rule: Rule) {
+        const payload = {
+            ...rule,
+            rule_regex: rule.rule_regex.source,
+            id: rule.id.toString(), // Convert BigInt to string for JSON serialization
+            config_id: rule.config_id.toString()
+        };
 
+        const res = await fetch('/api/rules', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
 
+        if (!res.ok) {
+            console.error("Error updating rule:", await res.text());
+            await alert("An error occurred while updating the rule. Please try again.");
+        }
+    }
 
-    return <><Card><SelectedRule /></Card><Card><RulesList rules={rules} setRules={setRules}/></Card></>
+    async function addNewRuleDatabase(rule: Rule) {
+        // Prepare rule for JSON
+        const payload = {
+            ...rule,
+            rule_regex: rule.rule_regex.source,
+            id: rule.id.toString(),
+            config_id: rule.config_id.toString()
+        };
+
+        const res = await fetch('/api/rules', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+
+        if (!res.ok) {
+            console.error("Error adding new rule:", await res.text());
+            await alert("An error occurred while adding the rule. Please try again.");
+        }
+    }
+
+    return (
+        <>
+            <SelectedRule selectedRule={selectedRule || null} setRule={setSelectedRule} />
+            <RulesList
+                rules={rules}
+                setRules={setRules}
+                selectedRule={selectedRule}
+                setSelectedRule={setSelectedRule}
+                updateRule={updateRuleDatabase}
+                deleteRule={deleteRuleDatabase}
+            />
+        </>
+    );
 }
