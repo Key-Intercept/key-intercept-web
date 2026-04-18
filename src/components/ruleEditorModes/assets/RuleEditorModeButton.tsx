@@ -18,9 +18,10 @@ export default function RuleEditorModeButton({ mode, icon, currentMode, setMode 
         gap: '4px',
         fontWeight: isActive ? 'bold' : 'normal',
         transition: 'all 0.2s ease',
-        flexDirection: 'row',
+        flexDirection: 'column',
         textAlign: 'center',
         justifyContent: 'center',
+        width: '100%',
     }
 
     let textMode: string;
@@ -28,7 +29,7 @@ export default function RuleEditorModeButton({ mode, icon, currentMode, setMode 
 
 
     return <button style={style} onMouseEnter={() => setIsHovered(true)} onMouseLeave={() => setIsHovered(false)} onClick={() => setMode(mode)}>
-        {icon}
-        {textMode}
+        <div>{icon}</div>
+        <div>{textMode}</div>
     </button>
 }

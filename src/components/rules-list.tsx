@@ -57,6 +57,18 @@ export default function RulesList({ rules, setRules, selectedRule, setSelectedRu
         setRules(output);
     }
 
+    async function setChance(id: bigint, chance: number) {
+        let output = [...rules]; // CREATE A COPY
+
+        for (let i = 0; i < output.length; i++) {
+            if (output[i].id == id) {
+                output[i].chance_to_apply = chance;
+            }
+        }
+        await updateRule(output.find((a) => a.id == id)!);
+        setRules(output);
+    }
+
     function selectRule(rule: Rule) {
         if (selectedRule?.id === rule.id) {
             setSelectedRule(null);
@@ -71,7 +83,7 @@ export default function RulesList({ rules, setRules, selectedRule, setSelectedRu
         ) : (
             <ul>
                 {rules.map((rule) => (
-                    <RulesListItem key={rule.id} selected={selectedRule?.id === rule.id} onSelected={selectRule} rule={rule} onDelete={DeleteRule} onIncrement={IncrementPriority} onDecrement={DecrementPriority} onToggled={toggleEnabled} />
+                    <RulesListItem key={rule.id} selected={selectedRule?.id === rule.id} onSelected={selectRule} rule={rule} onDelete={DeleteRule} onIncrement={IncrementPriority} onDecrement={DecrementPriority} onToggled={toggleEnabled} onSetChance={setChance} />
                 ))}
             </ul>
         )}

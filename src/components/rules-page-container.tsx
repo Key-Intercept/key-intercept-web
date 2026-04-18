@@ -62,7 +62,7 @@ export default function RulesPageContainer({ initialRules }: { initialRules: Rul
 
     return (
         <>
-            <SelectedRule selectedRule={selectedRule || null} setRule={setSelectedRule} />
+            <SelectedRule i_selectedRule={selectedRule || null} setRule={setSelectedRule} />
             <RulesList
                 rules={rules}
                 setRules={setRules}
