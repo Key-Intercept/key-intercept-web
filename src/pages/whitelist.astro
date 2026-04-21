@@ -1,0 +1,40 @@
+---
+export const prerender = false;
+
+import { createClient } from "@supabase/supabase-js";
+import Card from "../components/card";
+import MainPage from "../layouts/mainPage.astro";
+import WhitelistPageContainer from "../components/whitelist-page-container.tsx";
+import type { WhitelistItem } from "../script/types";
+const title = "Whitelist";
+
+const supabase = createClient(import.meta.env.SUPABASE_URL, import.meta.env.SUPABASE_SERVICE_KEY);
+
+if (!Astro.url.searchParams.get("config")) {
+    console.error("No config ID provided. Redirecting to configs page.");
+    return Astro.redirect("/main");
+}
+
+const configID = BigInt(Astro.url.searchParams.get("config")!);
+
+const { data: whitelistData, error } = await supabase
+    .from('Server_Whitelist_Items')
+    .select('*')
+    .eq('config_id', configID);
+
+if (error) {
+    console.error('[supabase] Error fetching whitelist:', error);
+    return Astro.redirect("/main");
+}
+
+const whitelistItems = whitelistData ? whitelistData.map((item) => ({
+    id: item.id,
+    config_id: item.config_id,
+    server_name: item.server_name,
+    discord_id: item.discord_id,
+})) : [];
+---
+
+<MainPage title={title}>
+    <WhitelistPageContainer client:only="react" initialItems={whitelistItems} configID={configID} />
+</MainPage>

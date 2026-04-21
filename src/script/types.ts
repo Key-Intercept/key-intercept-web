@@ -36,3 +36,10 @@ export type Rule = {
     label: string,
     order: number,
 };
+
+export type WhitelistItem = {
+    id: bigint,
+    config_id: bigint,
+    server_name: string,
+    discord_id: bigint,
+}
