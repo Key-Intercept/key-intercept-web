@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
 import type { APIRoute } from 'astro';
+import { serializeForSupabase } from '../../script/serializeForSupabase';
 
 export const prerender = false;
 
@@ -27,8 +28,14 @@ export const PUT: APIRoute = async ({ request }) => {
     if (updateData.rule_regex && updateData.rule_regex.source) {
       updateData.rule_regex = updateData.rule_regex.source;
     }
+
+    const serializedId = serializeForSupabase(id);
+    const serializedUpdateData = serializeForSupabase(updateData);
     
-    const { error } = await supabase.from('Rules').update(updateData).eq('id', id);
+    const { error } = await supabase
+      .from('Rules')
+      .update(serializedUpdateData)
+      .eq('id', serializedId);
     if (error) return new Response(error.message, { status: 500 });
     return new Response('OK', { status: 200 });
   } catch (err: any) {
@@ -44,8 +51,10 @@ export const POST: APIRoute = async ({ request }) => {
     if (body.rule_regex && body.rule_regex.source) {
       body.rule_regex = body.rule_regex.source;
     }
+
+    const serializedBody = serializeForSupabase(body);
     
-    const { error } = await supabase.from('Rules').insert(body);
+    const { error } = await supabase.from('Rules').insert(serializedBody);
     if (error) return new Response(error.message, { status: 500 });
     return new Response('OK', { status: 200 });
   } catch (err: any) {
