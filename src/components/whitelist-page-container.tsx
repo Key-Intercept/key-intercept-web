@@ -83,15 +83,15 @@ function WhitelistItemDiv({
                 <div style={textItemStyle}>
                     <p style={{ whiteSpace: "nowrap", margin: 0, width: "200px" }}>Server / User ID:</p>
                     <EditingArea
-                        value={item.discord_id == null || item.discord_id == BigInt(-1) ? "" : item.discord_id.toString()}
+                        value={item.discord_id == null || item.discord_id === "-1" ? "" : item.discord_id}
                         setValue={(value) => {
-                            try {
-                                const newId = value === "" ? BigInt(-1) : BigInt(value);
-                                onEdit({ ...item, discord_id: newId });
-                            } catch {
-                                // Invalid BigInt, reset instead of throwing error maybe
+                            if (!/^\d*$/.test(value)) {
                                 alert("Invalid Discord ID format. Must be a valid number.");
+                                return;
                             }
+
+                            const newId = value === "" ? "-1" : value;
+                            onEdit({ ...item, discord_id: newId });
                         }}
                     />
                 </div>
@@ -118,19 +118,19 @@ export default function WhitelistPageContainer({
             return alert("You must provide either a Name or an ID.");
         }
 
-        let discordId: bigint = BigInt(-1);
+        let discordId = "-1";
         if (newId.trim() !== "") {
-            try {
-                discordId = BigInt(newId);
-            } catch {
+            if (!/^\d+$/.test(newId.trim())) {
                 return alert("Invalid Discord ID format. Please enter a valid number.");
             }
+
+            discordId = newId.trim();
         }
 
         const payload = {
             config_id: configID.toString(),
             server_name: newName,
-            discord_id: discordId.toString(),
+            discord_id: discordId,
         };
 
         try {
@@ -161,7 +161,7 @@ export default function WhitelistPageContainer({
                 id: updatedItem.id.toString(),
                 config_id: updatedItem.config_id.toString(),
                 server_name: updatedItem.server_name,
-                discord_id: updatedItem.discord_id.toString(),
+                discord_id: updatedItem.discord_id,
             };
 
             const res = await fetch("/api/whitelist", {

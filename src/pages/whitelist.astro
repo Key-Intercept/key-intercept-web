@@ -31,7 +31,7 @@ const whitelistItems = whitelistData ? whitelistData.map((item) => ({
     id: item.id,
     config_id: item.config_id,
     server_name: item.server_name,
-    discord_id: item.discord_id,
+    discord_id: item.discord_id == null ? "-1" : String(item.discord_id),
 })) : [];
 ---
 
