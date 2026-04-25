@@ -31,27 +31,68 @@ import Separator from "./separator";
         flex-direction: column;
         align-items: center;
         justify-content: center;
-        padding: 1rem;
+        padding: var(--padding-section);
         color: #eee;
-        width: 100vw;
+        width: 100%;
+        gap: var(--spacing-sm);
     }
 
     footer p {
-        margin: 0.5rem 0;
+        margin: var(--spacing-xs) 0;
+        font-size: var(--font-size-base);
+        text-align: center;
     }
 
     footer a {
         color: #eee;
         text-decoration: none;
         font-weight: bold;
+        transition: all 0.3s ease;
     }
 
     footer a:hover {
         text-decoration: underline;
+        color: var(--color-accent);
+    }
+
+    footer ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: var(--spacing-xs);
     }
 
     footer li {
-        list-style: none;
         font-weight: 400;
+        font-size: var(--font-size-base);
+    }
+
+    /* Mobile responsive */
+    @media (max-width: 768px) {
+        footer {
+            padding: var(--spacing-md);
+        }
+
+        footer p {
+            font-size: var(--font-size-base);
+        }
+    }
+
+    @media (max-width: 480px) {
+        footer {
+            padding: 1rem;
+        }
+
+        footer p {
+            margin: 0.5rem 0;
+            font-size: 0.95rem;
+        }
+
+        footer li {
+            font-size: 0.95rem;
+        }
     }
 </style>

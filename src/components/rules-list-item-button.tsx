@@ -25,12 +25,16 @@ export default function RulesListItemButton({ onPressed, onHovered, square, chil
         color: 'white',
         borderRadius: '5px',
         border: 'none',
-        padding: '5px 5px',
+        padding: 'clamp(4px, 1vw, 5px)',
         cursor: 'pointer',
-        width: square ? '30px' : 'auto',
-        height: square ? '30px' : 'auto',
+        width: square ? 'clamp(28px, 5vw, 30px)' : 'auto',
+        height: square ? 'clamp(28px, 5vw, 30px)' : 'auto',
         marginLeft: '5px',
         marginRight: '5px',
+        minWidth: square ? '28px' : 'auto',
+        minHeight: square ? '28px' : 'auto',
+        fontSize: 'clamp(0.85rem, 1.5vw, 1rem)',
+        transition: 'all 0.2s ease',
     };
 
     return <button

@@ -205,9 +205,11 @@ export default function SelectedRule({
     const buttonContainerStyle: React.CSSProperties = {
         gap: "10px",
         marginBottom: "10px",
-        width: "50vw",
+        width: "100%",
+        maxWidth: "50vw",
         display: "grid",
-        gridTemplateColumns: "1fr 1fr 1fr 1fr 1fr",
+        gridTemplateColumns: "repeat(auto-fit, minmax(60px, 1fr))",
+        minWidth: "280px",
     };
 
     const submitButtonStyle: React.CSSProperties = {

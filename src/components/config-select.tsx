@@ -84,15 +84,22 @@ export default async function ConfigSelect({ discordID }: { discordID: string })
         return errorOccurred("--- No configs available ---");
     }
 
-    return <select id="config-select" style={{
-        width: '100%', 
-        fontSize: '1rem', 
-        borderWidth: '2px', 
-        borderColor: '#fff', 
-        borderRadius: '30px', 
-        marginBottom: '2rem', 
-        fontFamily: '"Major Mono Display", monospace', 
-        fontWeight: 400, 
-        fontStyle: 'normal'
-    }}>{renderedOptions}</select>;
+    const selectStyle: React.CSSProperties = {
+        width: '100%',
+        maxWidth: '400px',
+        padding: 'clamp(0.5rem, 2vw, 0.75rem)',
+        fontSize: 'clamp(0.95rem, 2vw, 1rem)',
+        borderWidth: '2px',
+        borderColor: '#fff',
+        borderRadius: '30px',
+        marginBottom: 'clamp(1rem, 3vw, 2rem)',
+        fontFamily: '"Major Mono Display", monospace',
+        fontWeight: 400,
+        fontStyle: 'normal',
+        backgroundColor: '#333',
+        color: '#eee',
+        cursor: 'pointer',
+    };
+
+    return <select id="config-select" style={selectStyle}>{renderedOptions}</select>;
 }

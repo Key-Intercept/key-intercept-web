@@ -1,0 +1,106 @@
+/* React Components Responsive Styles */
+
+.rules-list-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: var(--spacing-sm);
+    gap: var(--spacing-sm);
+}
+
+.rules-list-item {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+}
+
+.config-select-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    max-width: 400px;
+}
+
+/* Select element responsive styles */
+select {
+    width: 100%;
+    padding: clamp(0.5rem, 2vw, 0.75rem);
+    font-size: var(--font-size-base);
+    border-width: 2px;
+    border-color: #fff;
+    border-radius: 30px;
+    margin-bottom: var(--spacing-lg);
+    /* font-family: "Major Mono Display", monospace; */
+    font-weight: 400;
+    font-style: normal;
+    background-color: #333;
+    color: #eee;
+}
+
+select:focus {
+    outline: none;
+    border-color: var(--color-accent);
+    box-shadow: 0 0 0 3px rgba(64, 11, 186, 0.1);
+}
+
+/* Responsive tables and lists */
+.responsive-table {
+    width: 100%;
+    overflow-x: auto;
+    border-radius: 8px;
+}
+
+.responsive-table table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.responsive-table th,
+.responsive-table td {
+    padding: clamp(0.5rem, 2vw, 1rem);
+    text-align: left;
+    border-bottom: 1px solid #333;
+}
+
+.responsive-table th {
+    background-color: #222;
+    font-weight: bold;
+}
+
+/* Mobile responsive adjustments */
+@media (max-width: 768px) {
+    .rules-list-container {
+        max-width: 100%;
+    }
+
+    select {
+        margin-bottom: var(--spacing-md);
+    }
+}
+
+@media (max-width: 480px) {
+    .rules-list-container {
+        padding: var(--spacing-xs);
+        gap: var(--spacing-xs);
+    }
+
+    .rules-list-item {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .responsive-table {
+        font-size: 0.9rem;
+    }
+
+    .responsive-table th,
+    .responsive-table td {
+        padding: 0.5rem;
+    }
+}

@@ -2,10 +2,11 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 100%;
-    width: 100vw;
-    margin-top: 10vh;
-    margin-bottom: 10vh;
+    width: 100%;
+    min-height: 100%;
+    margin-top: clamp(5vh, 10vh, 15vh);
+    margin-bottom: clamp(5vh, 10vh, 15vh);
+    padding: var(--spacing-sm);
 }
 
 .card-container {
@@ -13,20 +14,54 @@
     flex-direction: column;
     align-items: center;
     background-color: #1e1e1e;
-    padding: 2rem;
+    padding: var(--padding-card);
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    border-radius: 30px;
+    border-radius: clamp(15px, 5vw, 30px);
     border-width: 2px;
     border-color: #eee;
     border-style: solid;
     color: #eee;
+    width: 100%;
+    max-width: 600px;
 }
 
 .card-title {
-    font-size: 4rem;
-    margin-bottom: 1rem;
+    font-size: var(--font-size-title);
+    margin-bottom: var(--spacing-md);
     text-align: center;
     font-family: "Jersey 10", sans-serif;
     font-weight: 400;
     font-style: normal;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+}
+
+/* Tablet and small screens */
+@media (max-width: 768px) {
+    .card-positioner {
+        margin-top: 8vh;
+        margin-bottom: 8vh;
+    }
+
+    .card-container {
+        border-radius: 20px;
+    }
+}
+
+/* Mobile screens */
+@media (max-width: 480px) {
+    .card-positioner {
+        margin-top: 5vh;
+        margin-bottom: 5vh;
+        padding: var(--spacing-xs);
+    }
+
+    .card-container {
+        padding: var(--spacing-md);
+        border-radius: 15px;
+    }
+
+    .card-title {
+        margin-bottom: var(--spacing-sm);
+    }
 }
