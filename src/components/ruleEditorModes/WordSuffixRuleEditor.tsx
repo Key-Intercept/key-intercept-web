@@ -6,14 +6,17 @@ export default function WordSuffixRuleEditor({
     rule,
     setRegex,
     setReplacement,
+    setLabel,
 }: {
     rule: Rule;
     setRegex: (regex: RegExp) => void;
     setReplacement: (replacement: string) => void;
+    setLabel: (label: string) => void;
 }) {
     function handleReplacementChange(value: string) {
         setReplacement(value + "$1");
         setRegex(new RegExp("\b\w+\b"));
+        setLabel(`Word Suffix: "${value}"`);
     }
 
     const containerStyle: React.CSSProperties = {

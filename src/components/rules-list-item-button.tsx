@@ -6,12 +6,12 @@ export default function RulesListItemButton({ onPressed, onHovered, square, chil
 
     const handleMouseEnter = () => {
         setHovered(true);
-        onHovered && onHovered(true);
+        onHovered && onHovered(true, buttonStyle);
     };
 
     const handleMouseLeave = () => {
         setHovered(false);
-        onHovered && onHovered(false);
+        onHovered && onHovered(false, buttonStyle);
     };
 
     const handleClick = () => {

@@ -2,15 +2,17 @@ import { useEffect, useState } from "react";
 import type { Rule } from "../../script/types";
 import Checkbox from "./assets/Checkbox";
 import Label from "./assets/Label";
+import { normalizeRegexSource } from "./assets/regex";
 import Textbox from "./assets/Textbox";
 import DropDown from "./assets/Dropdown";
 
-export default function LookaroundRuleEditor({ rule, setRegex, setReplacement }: { rule: Rule, setRegex: (regex: RegExp) => void, setReplacement: (replacement: string) => void }) {
+export default function LookaroundRuleEditor({ rule, setRegex, setReplacement, setLabel
+ }: { rule: Rule, setRegex: (regex: RegExp) => void, setReplacement: (replacement: string) => void, setLabel: (label: string) => void }) {
     const [lookaroundType, setLookaroundType] = useState("It Is followed by");
     const [followingText, setFollowingText] = useState("");
 
     useEffect(() => {
-        handleRegexChange(rule.rule_regex.source);
+        handleRegexChange(normalizeRegexSource(rule.rule_regex.source));
     }, [lookaroundType, followingText]);
 
     function handleRegexChange(value: string) {
@@ -32,14 +34,17 @@ export default function LookaroundRuleEditor({ rule, setRegex, setReplacement }:
                 newRegex = new RegExp(value);
         }
         setRegex(newRegex);
+        setLabel(`If "${value}" ${lookaroundType.toLowerCase()} "${followingText}", replace with "${rule.rule_replacement}"`);
     }
 
     function handleLookaroundTypeChange(value: string) {
         setLookaroundType(value);
+        setLabel(`If "${rule.rule_regex.source}" ${value.toLowerCase()} "${followingText}", replace with "${rule.rule_replacement}"`);
     }
 
     function handleReplacementChange(value: string) {
         setReplacement(value);
+        setLabel(`If "${rule.rule_regex.source}" ${lookaroundType.toLowerCase()} "${followingText}", replace with "${value}"`);
     }
 
     const textboxContainerStyle: React.CSSProperties = {
@@ -58,7 +63,7 @@ export default function LookaroundRuleEditor({ rule, setRegex, setReplacement }:
     return <div style={containerStyle}>
         <div>
             <Label>Find this text</Label>
-            <Textbox placeholder="Text to find" defaultValue={rule.rule_regex.source} onChange={handleRegexChange} />
+            <Textbox placeholder="Text to find" defaultValue={normalizeRegexSource(rule.rule_regex.source)} onChange={handleRegexChange} />
         </div>
         <div>
             <Label>But only if...</Label>

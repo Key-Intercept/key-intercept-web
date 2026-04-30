@@ -26,12 +26,18 @@ import SuperRuleEditor from "./ruleEditorModes/SuperRuleEditor";
 
 export default function SelectedRule({
 	i_selectedRule,
+	defaultConfigId,
 	setRule,
 }: {
 	i_selectedRule: Rule | null;
+	defaultConfigId: bigint;
 	setRule: (rule: Rule | null) => void;
 }) {
 	const [localRule, setLocalRule] = useState<Rule | null>(i_selectedRule);
+
+	useEffect(() => {
+		// no-op: localRule updates are now handled via functional setters
+	}, [localRule]);
 	const [editorMode, setEditorMode] = useState(RuleType.Custom);
 
 	useEffect(() => {
@@ -43,7 +49,7 @@ export default function SelectedRule({
 		setEditorMode(mode);
 		setLocalRule({
 			id: -1n,
-			config_id: -1n,
+			config_id: defaultConfigId,
 			rule_regex: new RegExp(""),
 			rule_replacement: "",
 			enabled: true,
@@ -55,7 +61,7 @@ export default function SelectedRule({
 	if (!selectedRule) {
 		selectedRule = {
 			id: -1n,
-			config_id: -1n,
+			config_id: defaultConfigId,
 			rule_regex: new RegExp(""),
 			rule_replacement: "",
 			enabled: true,
@@ -64,49 +70,67 @@ export default function SelectedRule({
 	}
 	const isNewRule = !i_selectedRule || i_selectedRule.id === -1n;
 
+	function setRegexProp(regex: RegExp) {
+		setLocalRule((prev) => (prev ? { ...prev, rule_regex: regex } : null));
+	}
+
+	function setReplacementProp(replacement: string) {
+		setLocalRule((prev) => (prev ? { ...prev, rule_replacement: replacement } : null));
+	}
+
+	function setLabelProp(label: string) {
+		setLocalRule((prev) => (prev ? { ...prev, rule_label: label } : null));
+	}
+
 	const editorComponent = () => {
 		const rule = selectedRule;
 		switch (editorMode) {
 			case RuleType.Swap:
 				return (
 					<SwapRuleEditor rule={rule}
-						setRegex={(regex) => setLocalRule(selectedRule ? { ...selectedRule, rule_regex: regex } : null)}
-						setReplacement={(replacement) => setLocalRule(selectedRule ? { ...selectedRule, rule_replacement: replacement } : null)}
+						setRegex={setRegexProp}
+						setReplacement={setReplacementProp}
+						setLabel={setLabelProp}
 					/>
 				);
 			case RuleType.Letters:
 				return (
 					<LettersRuleEditor rule={rule}
-						setRegex={(regex) => setLocalRule(selectedRule ? { ...selectedRule, rule_regex: regex } : null)}
-						setReplacement={(replacement) => setLocalRule(selectedRule ? { ...selectedRule, rule_replacement: replacement } : null,)}
+						setRegex={setRegexProp}
+						setReplacement={setReplacementProp}
+						setLabel={setLabelProp}
 					/>
 				);
 			case RuleType.Prefix:
 				return (
 					<PrefixRuleEditor rule={rule}
-						setRegex={(regex) => setLocalRule(selectedRule ? { ...selectedRule, rule_regex: regex } : null)}
-						setReplacement={(replacement) => setLocalRule(selectedRule ? { ...selectedRule, rule_replacement: replacement } : null)}
+						setRegex={setRegexProp}
+						setReplacement={setReplacementProp}
+						setLabel={setLabelProp}
 					/>
 				);
 			case RuleType.Suffix:
 				return (
 					<SuffixRuleEditor rule={rule}
-						setRegex={(regex) => setLocalRule(selectedRule ? { ...selectedRule, rule_regex: regex } : null)}
-						setReplacement={(replacement) => setLocalRule(selectedRule ? { ...selectedRule, rule_replacement: replacement } : null)}
+						setRegex={setRegexProp}
+						setReplacement={setReplacementProp}
+						setLabel={setLabelProp}
 					/>
 				);
 			case RuleType.WordPrefix:
 				return (
 					<WordPrefixRuleEditor rule={rule}
-						setRegex={(regex) => setLocalRule(selectedRule ? { ...selectedRule, rule_regex: regex } : null)}
-						setReplacement={(replacement) => setLocalRule(selectedRule ? { ...selectedRule, rule_replacement: replacement } : null)}
+						setRegex={setRegexProp}
+						setReplacement={setReplacementProp}
+						setLabel={setLabelProp}
 					/>
 				);
 			case RuleType.WordSuffix:
 				return (
 					<WordSuffixRuleEditor rule={rule}
-						setRegex={(regex) => setLocalRule(selectedRule ? { ...selectedRule, rule_regex: regex } : null)}
-						setReplacement={(replacement) => setLocalRule(selectedRule ? { ...selectedRule, rule_replacement: replacement } : null)}
+						setRegex={setRegexProp}
+						setReplacement={setReplacementProp}
+						setLabel={setLabelProp}
 					/>
 				);
 			case RuleType.Custom:
@@ -114,92 +138,105 @@ export default function SelectedRule({
 					<CustomRuleEditor
 						key={rule.id.toString()}
 						rule={rule}
-						setRegex={(regex) => setLocalRule(selectedRule ? { ...selectedRule, rule_regex: regex } : null)}
-						setReplacement={(replacement) => setLocalRule(selectedRule ? { ...selectedRule, rule_replacement: replacement } : null)}
+						setRegex={setRegexProp}
+						setReplacement={setReplacementProp}
+						setLabel={setLabelProp}
 					/>
 				);
 			case RuleType.Charset:
 				return (
 					<CharsetRuleEditor rule={rule}
-						setRegex={(regex) => setLocalRule(selectedRule ? { ...selectedRule, rule_regex: regex } : null)}
-						setReplacement={(replacement) => setLocalRule(selectedRule ? { ...selectedRule, rule_replacement: replacement } : null)}
+						setRegex={setRegexProp}
+						setReplacement={setReplacementProp}
+						setLabel={setLabelProp}
 					/>
 				);
 			case RuleType.Lookaround:
 				return (
 					<LookaroundRuleEditor rule={rule}
-						setRegex={(regex) => setLocalRule(selectedRule ? { ...selectedRule, rule_regex: regex } : null)}
-						setReplacement={(replacement) => setLocalRule(selectedRule ? { ...selectedRule, rule_replacement: replacement } : null)}
+						setRegex={setRegexProp}
+						setReplacement={setReplacementProp}
+						setLabel={setLabelProp}
 					/>
 				);
 			case RuleType.Bold:
 				return (
 					<BoldRuleEditor rule={rule}
-						setRegex={(regex) => setLocalRule(selectedRule ? { ...selectedRule, rule_regex: regex } : null)}
-						setReplacement={(replacement) => setLocalRule(selectedRule ? { ...selectedRule, rule_replacement: replacement } : null)}
+						setRegex={setRegexProp}
+						setReplacement={setReplacementProp}
+						setLabel={setLabelProp}
 					/>
 				);
 			case RuleType.Italic:
 				return (
 					<ItalicRuleEditor rule={rule}
-						setRegex={(regex) => setLocalRule(selectedRule ? { ...selectedRule, rule_regex: regex } : null)}
-						setReplacement={(replacement) => setLocalRule(selectedRule ? { ...selectedRule, rule_replacement: replacement } : null)}
+						setRegex={setRegexProp}
+						setReplacement={setReplacementProp}
+						setLabel={setLabelProp}
 					/>
 				);
 			case RuleType.BoltItalic:
 				return (
 					<BoltItalicRuleEditor rule={rule}
-						setRegex={(regex) => setLocalRule(selectedRule ? { ...selectedRule, rule_regex: regex } : null)}
-						setReplacement={(replacement) => setLocalRule(selectedRule ? { ...selectedRule, rule_replacement: replacement } : null)}
+						setRegex={setRegexProp}
+						setReplacement={setReplacementProp}
+						setLabel={setLabelProp}
 					/>
 				);
 			case RuleType.Underline:
 				return (
 					<UnderlineRuleEditor rule={rule}
-						setRegex={(regex) => setLocalRule(selectedRule ? { ...selectedRule, rule_regex: regex } : null)}
-						setReplacement={(replacement) => setLocalRule(selectedRule ? { ...selectedRule, rule_replacement: replacement } : null)}
+						setRegex={setRegexProp}
+						setReplacement={setReplacementProp}
+						setLabel={setLabelProp}
 					/>
 				);
 			case RuleType.Strikethrough:
 				return (
 					<StrikethroughRuleEditor rule={rule}
-						setRegex={(regex) => setLocalRule(selectedRule ? { ...selectedRule, rule_regex: regex } : null)}
-						setReplacement={(replacement) => setLocalRule(selectedRule ? { ...selectedRule, rule_replacement: replacement } : null)}
+						setRegex={setRegexProp}
+						setReplacement={setReplacementProp}
+						setLabel={setLabelProp}
 					/>
 				);
 			case RuleType.Code:
 				return (
 					<CodeRuleEditor rule={rule}
-						setRegex={(regex) => setLocalRule(selectedRule ? { ...selectedRule, rule_regex: regex } : null)}
-						setReplacement={(replacement) => setLocalRule(selectedRule ? { ...selectedRule, rule_replacement: replacement } : null)}
+						setRegex={setRegexProp}
+						setReplacement={setReplacementProp}
+						setLabel={setLabelProp}
 					/>
 				);
 			case RuleType.Spoiler:
 				return (
 					<SpoilerRuleEditor rule={rule}
-						setRegex={(regex) => setLocalRule(selectedRule ? { ...selectedRule, rule_regex: regex } : null)}
-						setReplacement={(replacement) => setLocalRule(selectedRule ? { ...selectedRule, rule_replacement: replacement } : null)}
+						setRegex={setRegexProp}
+						setReplacement={setReplacementProp}
+						setLabel={setLabelProp}
 					/>
 				);
 			case RuleType.Quote:
 				return (
 					<QuoteRuleEditor rule={rule}
-						setRegex={(regex) => setLocalRule(selectedRule ? { ...selectedRule, rule_regex: regex } : null)}
-						setReplacement={(replacement) => setLocalRule(selectedRule ? { ...selectedRule, rule_replacement: replacement } : null)}
+						setRegex={setRegexProp}
+						setReplacement={setReplacementProp}
+						setLabel={setLabelProp}
 					/>
 				);
 			case RuleType.Sub:
 				return (
 					<SubRuleEditor rule={rule}
-						setRegex={(regex) => setLocalRule(selectedRule ? { ...selectedRule, rule_regex: regex } : null)}
-						setReplacement={(replacement) => setLocalRule(selectedRule ? { ...selectedRule, rule_replacement: replacement } : null)}
+						setRegex={setRegexProp}
+						setReplacement={setReplacementProp}
+						setLabel={setLabelProp}
 					/>
 				);
 			case RuleType.Super:
 				return (
 					<SuperRuleEditor rule={rule}
-						setRegex={(regex) => setLocalRule(selectedRule ? { ...selectedRule, rule_regex: regex } : null)}
-						setReplacement={(replacement) => setLocalRule(selectedRule ? { ...selectedRule, rule_replacement: replacement } : null)}
+						setRegex={setRegexProp}
+						setReplacement={setReplacementProp}
+						setLabel={setLabelProp}
 					/>
 				);
 			default:
@@ -207,8 +244,9 @@ export default function SelectedRule({
 					<CustomRuleEditor
 						key={rule.id.toString()}
 						rule={rule}
-						setRegex={(regex) => setLocalRule(selectedRule ? { ...selectedRule, rule_regex: regex } : null)}
+						setRegex={setRegexProp}
 						setReplacement={(replacement) => setLocalRule(selectedRule ? { ...selectedRule, rule_replacement: replacement } : null)}
+						setLabel={setLabelProp}
 					/>
 				);
 		}
@@ -389,7 +427,11 @@ export default function SelectedRule({
 			<div style={editorContainerStyle}>
 				<div>{editorComponent()}</div>
 				<Separator color="#333" />
-				<button style={submitButtonStyle} onClick={() => setRule(selectedRule)}>
+				<button style={submitButtonStyle} onClick={() => {
+					console.log("Submitting rule:", selectedRule);
+					setRule(selectedRule)
+					console.log("Rule submitted:", selectedRule);
+					}}>
 					{isNewRule ? "Add Rule" : "Edit Rule"}
 				</button>
 			</div>

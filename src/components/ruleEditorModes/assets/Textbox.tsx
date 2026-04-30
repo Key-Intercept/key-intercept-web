@@ -7,11 +7,12 @@ export default function Textbox({ placeholder, defaultValue, onChange }: { place
         backgroundColor: '#222222',
         color: 'white',
     }
-
     return <input
         type="text"
         placeholder={placeholder}
         defaultValue={defaultValue}
-        onInput={(e) => onChange((e.target as HTMLInputElement).value)}
+        onInput={(e) => {
+            onChange((e.target as HTMLInputElement).value);
+        }}
         style={style} />
 }

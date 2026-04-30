@@ -1,15 +1,18 @@
 import type { Rule } from "../../script/types";
 import Label from "./assets/Label";
+import { normalizeRegexSource } from "./assets/regex";
 import Textbox from "./assets/Textbox";
 
 export default function SubRuleEditor({
     rule,
     setRegex,
     setReplacement,
+    setLabel,
 }: {
     rule: Rule;
     setRegex: (regex: RegExp) => void;
     setReplacement: (replacement: string) => void;
+    setLabel: (label: string) => void;
 }) {
     function handleRegexChange(value: string) {
         if (value === "") {
@@ -18,14 +21,14 @@ export default function SubRuleEditor({
             setRegex(new RegExp(`^([\\s\\S]*${value}[\\s\\S]*)$`));
         }
         setReplacement("-#$1");
+        setLabel(`Subtext: "${value}"`);
     }
 
     const containerStyle: React.CSSProperties = {
         width: "100%",
     };
 
-    let defaultValue = rule.rule_regex.source;
-    if (defaultValue === "(?:)") defaultValue = "";
+    let defaultValue = normalizeRegexSource(rule.rule_regex.source);
     if (defaultValue === "^([\\s\\S]*)$") defaultValue = "";
     defaultValue = defaultValue.replace(/^\^\(\[\\s\\S\]\*/, "").replace(/\[\\s\\S\]\*\)\$$/, "");
 

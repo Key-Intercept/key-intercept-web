@@ -5,12 +5,13 @@ import Label from "./assets/Label";
 import Textbox from "./assets/Textbox";
 import DropDown from "./assets/Dropdown";
 
-export default function CharsetRuleEditor({ rule, setRegex, setReplacement }: { rule: Rule, setRegex: (regex: RegExp) => void, setReplacement: (replacement: string) => void }) {
+export default function CharsetRuleEditor({ rule, setRegex, setReplacement, setLabel }: { rule: Rule, setRegex: (regex: RegExp) => void, setReplacement: (replacement: string) => void, setLabel: (label: string) => void }) {
     const [matchType, setMatchType] = useState("Match ANY of these characters");
 
     function handleRegexChange(value: string) {
         const newRegex = new RegExp(value.split("").join("|"));
         setRegex(newRegex);
+        setLabel("Charset: " + value + " (" + matchType + ") " + "-> " + rule.rule_replacement);
     }
 
     function handleReplacementChange(value: string) {

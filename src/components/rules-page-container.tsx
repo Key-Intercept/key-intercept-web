@@ -4,9 +4,10 @@ import RulesList from "./rules-list";
 import Card from "./card";
 import SelectedRule from "./selectedRule";
 
-export default function RulesPageContainer({ initialRules }: { initialRules: Rule[] }) {
+export default function RulesPageContainer({ initialRules, initialConfigId }: { initialRules: Rule[]; initialConfigId: string }) {
 	const [rules, setRules] = useState(initialRules.sort((a, b) => a.order - b.order));
 	const [selectedRule, setSelectedRule] = useState<Rule | null>(null);
+	const currentConfigId = BigInt(initialConfigId);
 
 	async function deleteRuleDatabase(id: bigint) {
 		const res = await fetch(`/api/rules?id=${id}`, {
@@ -22,7 +23,8 @@ export default function RulesPageContainer({ initialRules }: { initialRules: Rul
 	async function updateRuleDatabase(rule: Rule) {
 		const payload = {
 			...rule,
-			rule_regex: rule.rule_regex.source,
+			// convert RegExp source '(?:)' (from new RegExp('')) to empty string
+			rule_regex: rule.rule_regex.source === '(?:)' ? '' : rule.rule_regex.source,
 			id: rule.id.toString(), // Convert BigInt to string for JSON serialization
 			config_id: rule.config_id.toString()
 		};
@@ -37,15 +39,20 @@ export default function RulesPageContainer({ initialRules }: { initialRules: Rul
 			console.error("Error updating rule:", await res.text());
 			await alert("An error occurred while updating the rule. Please try again.");
 		}
+		setRules(prevRules => {
+			const updatedRules = prevRules.map(r => r.id === rule.id ? rule : r);
+			return updatedRules.sort((a, b) => a.order - b.order);
+		});
 	}
 
 	async function addNewRuleDatabase(rule: Rule) {
 		// Prepare rule for JSON
+		const { id: _id, config_id: _configId, ...ruleData } = rule;
 		const payload = {
-			...rule,
-			rule_regex: rule.rule_regex.source,
-			id: rule.id.toString(),
-			config_id: rule.config_id.toString()
+			...ruleData,
+			// convert RegExp source '(?:)' (from new RegExp('')) to empty string
+			rule_regex: rule.rule_regex.source === '(?:)' ? '' : rule.rule_regex.source,
+			config_id: currentConfigId.toString()
 		};
 
 		const res = await fetch('/api/rules', {
@@ -58,11 +65,16 @@ export default function RulesPageContainer({ initialRules }: { initialRules: Rul
 			console.error("Error adding new rule:", await res.text());
 			await alert("An error occurred while adding the rule. Please try again.");
 		}
+
+		setRules(prevRules => {
+			const newRule = { ...rule, id: BigInt(-1) }; // Temporary ID until we get the real one from the server
+			return [...prevRules, newRule].sort((a, b) => a.order - b.order);
+		});
 	}
 
 	return (
 		<>
-			<SelectedRule i_selectedRule={selectedRule || null} setRule={(rule) => {
+			<SelectedRule i_selectedRule={selectedRule || null} defaultConfigId={currentConfigId} setRule={(rule) => {
 				setSelectedRule(rule)
 				if (rule!.id === -1n) {
 					addNewRuleDatabase(rule!);

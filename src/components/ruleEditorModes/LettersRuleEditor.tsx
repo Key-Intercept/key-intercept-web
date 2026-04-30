@@ -1,25 +1,28 @@
 import type { Rule } from "../../script/types";
 import Label from "./assets/Label";
+import { normalizeRegexSource } from "./assets/regex";
 import Textbox from "./assets/Textbox";
 
 export default function LettersRuleEditor({
     rule,
     setRegex,
     setReplacement,
+    setLabel,
 }: {
     rule: Rule;
     setRegex: (regex: RegExp) => void;
     setReplacement: (replacement: string) => void;
+    setLabel: (label: string) => void;
 }) {
-    const isNewRule = rule.id === -1n;
-
     function handleRegexChange(value: string) {
         const newRegex = new RegExp(value);
         setRegex(newRegex);
+        setLabel(value + " -> " + rule.rule_replacement);
     }
 
     function handleReplacementChange(value: string) {
         setReplacement(value);
+        setLabel(rule.rule_regex.source + " -> " + value);
     }
 
     const containerStyle: React.CSSProperties = {
@@ -39,7 +42,7 @@ export default function LettersRuleEditor({
             <div style={inputContainerStyle}>
                 <Textbox
                     placeholder="a"
-                    defaultValue={rule.rule_regex.source.replace(/^\^|\$$/g, "")}
+                    defaultValue={normalizeRegexSource(rule.rule_regex.source).replace(/^\^|\$$/g, "")}
                     onChange={handleRegexChange}
                 />
                 →

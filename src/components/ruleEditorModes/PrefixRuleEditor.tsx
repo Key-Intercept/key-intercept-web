@@ -6,14 +6,17 @@ export default function PrefixRuleEditor({
     rule,
     setRegex,
     setReplacement,
+    setLabel,
 }: {
     rule: Rule;
     setRegex: (regex: RegExp) => void;
     setReplacement: (replacement: string) => void;
+    setLabel: (label: string) => void;
 }) {
     function handleReplacementChange(value: string) {
         setReplacement(value);
         setRegex(new RegExp("^"));
+        setLabel(`Add "${value}" to start of message`);
     }
 
     const containerStyle: React.CSSProperties = {

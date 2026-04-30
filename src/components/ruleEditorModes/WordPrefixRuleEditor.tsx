@@ -6,14 +6,17 @@ export default function WordPrefixRuleEditor({
     rule,
     setRegex,
     setReplacement,
+    setLabel,
 }: {
     rule: Rule;
     setRegex: (regex: RegExp) => void;
     setReplacement: (replacement: string) => void;
+    setLabel: (label: string) => void;
 }) {
     function handleReplacementChange(value: string) {
         setReplacement(value + "$1");
         setRegex(new RegExp("\b\w+\b"));
+        setLabel(`Word Prefix: "${value}"`);
     }
 
     const containerStyle: React.CSSProperties = {

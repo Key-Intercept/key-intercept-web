@@ -2,10 +2,10 @@ import { useState } from "react";
 import type { Rule } from "../../script/types";
 import Checkbox from "./assets/Checkbox";
 import Label from "./assets/Label";
+import { normalizeRegexSource } from "./assets/regex";
 import Textbox from "./assets/Textbox";
 
-export default function SwapRuleEditor({ rule, setRegex, setReplacement }: { rule: Rule, setRegex: (regex: RegExp) => void, setReplacement: (replacement: string) => void }) {
-    const isNewRule = rule.id === -1n;
+export default function SwapRuleEditor({ rule, setRegex, setReplacement, setLabel }: { rule: Rule, setRegex: (regex: RegExp) => void, setReplacement: (replacement: string) => void, setLabel: (label: string) => void }) {
 
     const [wholeWord, setWholeWord] = useState(rule.rule_regex.source.startsWith('\\b') && rule.rule_regex.source.endsWith('\\b'));
 
@@ -15,10 +15,12 @@ export default function SwapRuleEditor({ rule, setRegex, setReplacement }: { rul
         }
         const newRegex = new RegExp(value);
         setRegex(newRegex);
+        setLabel(`Swap: "${value}"`);
     }
 
     function handleReplacementChange(value: string) {
         setReplacement(value);
+        setLabel(`Swap: "${value}"`);
     }
 
     const textboxContainerStyle: React.CSSProperties = {
@@ -42,7 +44,7 @@ export default function SwapRuleEditor({ rule, setRegex, setReplacement }: { rul
     return <div style={containerStyle}>
         <Label>Find and Replace</Label>
         <div style={textboxContainerStyle}>
-            <Textbox placeholder="Find..." defaultValue={rule.rule_regex.source.replace(/^\\b|\\b$/g, '').replace('(?:)', '')} onChange={handleRegexChange} />
+            <Textbox placeholder="Find..." defaultValue={normalizeRegexSource(rule.rule_regex.source).replace(/^\\b|\\b$/g, '').replace('(?:)', '')} onChange={handleRegexChange} />
             <Textbox placeholder="Replace with..." defaultValue={rule.rule_replacement} onChange={handleReplacementChange} />
         </div>
         <div style={checkboxStyle}>

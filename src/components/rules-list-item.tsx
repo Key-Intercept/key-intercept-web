@@ -59,15 +59,6 @@ const [EditChancePressed, setEditChancePressed] = useState(false);
         width: '100%',
     }
 
-    const setDeleteHover = (hovered: boolean, style: React.CSSProperties) => {
-        style.backgroundColor = hovered ? 'red' : 'grey';
-    }
-
-    const setButtonHover = (hovered: boolean, style: React.CSSProperties) => {
-        style.backgroundColor = hovered ? "lightgray" : 'grey'
-        style.color = hovered ? 'black' : 'white'
-    }
-
     const EditChanceInputStyle: React.CSSProperties = {
         width: 'clamp(50px, 10vw, 80px)',
         padding: '5px',
@@ -78,7 +69,7 @@ const [EditChancePressed, setEditChancePressed] = useState(false);
     }
 
     return <div style={containerStyle} onClick={() => onSelected(rule)} onMouseEnter={() => setHovered(true)} onMouseLeave={() => setHovered(false)}>
-        <RulesListItemButton onHovered={setButtonHover} square={true} onPressed={() => onToggled(rule.id)}>
+        <RulesListItemButton square={true} onPressed={() => onToggled(rule.id)}>
             {rule.enabled ? rule.order : 'x'}
         </RulesListItemButton>
         <div style={textContainerStyle}>
@@ -99,13 +90,13 @@ const [EditChancePressed, setEditChancePressed] = useState(false);
                 style={EditChanceInputStyle}
             />
         )}
-        <RulesListItemButton onHovered={setButtonHover} square={false} onPressed={() => setEditChancePressed(!EditChancePressed)}>
+        <RulesListItemButton square={false} onPressed={() => setEditChancePressed(!EditChancePressed)}>
             {rule.chance_to_apply * 100}%
         </RulesListItemButton>
         <div>
-            <RulesListItemButton onHovered={setButtonHover} square={true} onPressed={() => onIncrement(rule.id)}>↑</RulesListItemButton>
-            <RulesListItemButton onHovered={setButtonHover} square={true} onPressed={() => onDecrement(rule.id)}>↓</RulesListItemButton>
-            <RulesListItemButton onHovered={setDeleteHover} square={true} onPressed={() => onDelete(rule.id)}>
+            <RulesListItemButton square={true} onPressed={() => onIncrement(rule.id)}>↑</RulesListItemButton>
+            <RulesListItemButton square={true} onPressed={() => onDecrement(rule.id)}>↓</RulesListItemButton>
+            <RulesListItemButton square={true} onPressed={() => onDelete(rule.id)}>
                 x
             </RulesListItemButton>
         </div>

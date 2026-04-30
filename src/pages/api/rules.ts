@@ -24,9 +24,9 @@ export const PUT: APIRoute = async ({ request }) => {
     const body = await request.json();
     const { id, ...updateData } = body;
     
-    // Convert regex back to string for DB
+    // Convert regex back to string for DB and normalize empty-regex placeholder
     if (updateData.rule_regex && updateData.rule_regex.source) {
-      updateData.rule_regex = updateData.rule_regex.source;
+      updateData.rule_regex = updateData.rule_regex.source === '(?:)' ? '' : updateData.rule_regex.source;
     }
 
     const serializedId = serializeForSupabase(id);
@@ -47,12 +47,12 @@ export const POST: APIRoute = async ({ request }) => {
   try {
     const body = await request.json();
     
-    // Convert regex back to string for DB
+    // Convert regex back to string for DB and normalize empty-regex placeholder
     if (body.rule_regex && body.rule_regex.source) {
-      body.rule_regex = body.rule_regex.source;
+      body.rule_regex = body.rule_regex.source === '(?:)' ? '' : body.rule_regex.source;
     }
-
-    const serializedBody = serializeForSupabase(body);
+    const { id: _id, ...insertData } = body;
+    const serializedBody = serializeForSupabase(insertData);
     
     const { error } = await supabase.from('Rules').insert(serializedBody);
     if (error) return new Response(error.message, { status: 500 });
