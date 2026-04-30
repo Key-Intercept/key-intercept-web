@@ -18,9 +18,12 @@ const [EditChancePressed, setEditChancePressed] = useState(false);
         borderRadius: '20px',
         flexDirection: 'row',
         gap: '10px',
-        width: '40vw',
+        width: '100%',
+        maxWidth: '40vw',
+        minWidth: '280px',
         backgroundColor:'#111111',
         cursor: 'pointer',
+        flexWrap: 'wrap',
     }
 
     const textContainerStyle: React.CSSProperties = {
@@ -31,18 +34,29 @@ const [EditChancePressed, setEditChancePressed] = useState(false);
         flex: 1,
         marginLeft: '10px',
         marginRight: '10px',
+        minWidth: '150px',
+        overflow: 'hidden',
     }
 
     const labelStyle: React.CSSProperties = {
         fontWeight: 'bold',
-        fontSize: '16px',
+        fontSize: 'clamp(0.9rem, 2vw, 1rem)',
         textDecoration: rule.enabled ? 'none' : 'line-through',
+        overflow: 'hidden',
+        textOverflow: 'ellipsis',
+        whiteSpace: 'nowrap',
+        width: '100%',
     }
 
     const regexStyle: React.CSSProperties = {
         fontStyle: 'italic',
         color: '#555',
         textDecoration: rule.enabled ? 'none' : 'line-through',
+        fontSize: 'clamp(0.85rem, 1.5vw, 0.95rem)',
+        overflow: 'hidden',
+        textOverflow: 'ellipsis',
+        whiteSpace: 'nowrap',
+        width: '100%',
     }
 
     const setDeleteHover = (hovered: boolean, style: React.CSSProperties) => {
@@ -55,7 +69,7 @@ const [EditChancePressed, setEditChancePressed] = useState(false);
     }
 
     const EditChanceInputStyle: React.CSSProperties = {
-        width: '60px',
+        width: 'clamp(50px, 10vw, 80px)',
         padding: '5px',
         borderRadius: '5px',
         border: '1px solid #ccc',

@@ -6,21 +6,41 @@ const { id } = Astro.props;
 
 <style>
 button {
-        padding: 0.5rem 1rem;
-        font-size: 1.2rem;
+        padding: clamp(0.5rem, 2vw, 1rem) clamp(1rem, 4vw, 1.5rem);
+        font-size: var(--font-size-lg);
         background-color: #eee;
         color: #1e1e1e;
         border: none;
         border-radius: 30px;
         cursor: pointer;
-        transition: background-color 0.3s ease;
+        transition: all 0.3s ease;
         font-family: "Major Mono Display", monospace;
         font-weight: 400;
         font-style: normal;
+        white-space: nowrap;
+        user-select: none;
+        min-height: 2.5rem;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
     }
 
     button:hover {
-        background-color: #222;
+        background-color: var(--color-hover);
         color: #ddd;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+    }
+
+    button:active {
+        transform: translateY(0);
+    }
+
+    /* Mobile responsive */
+    @media (max-width: 480px) {
+        button {
+            width: 100%;
+            max-width: 300px;
+        }
     }
 </style>

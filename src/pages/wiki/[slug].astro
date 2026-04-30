@@ -2,21 +2,22 @@
 export const prerender = false;
 import Layout from "../../layouts/mainPage.astro";
 
-export async function getStaticPaths() {
-    const wikiPages = await import.meta.glob("../../data/wiki/*.md");
-    return Object.entries(wikiPages)
-        .filter(([path]) => {
-            const fileName = path.split("/").pop();
-            return !fileName!.startsWith("_");
-        })
-        .map(([path, page]) => {
-            const fileName = path.split("/").pop()!;
-            const slug = fileName.replace(".md", "");
-            return { params: { slug }, props: { page, allPages: wikiPages } };
-        });
+const { slug } = Astro.params;
+const wikiPages = import.meta.glob("../../data/wiki/*.md");
+
+let page;
+for (const path in wikiPages) {
+    const fileName = path.split("/").pop();
+    if (fileName && !fileName.startsWith("_") && fileName.replace(".md", "") === slug) {
+        page = wikiPages[path];
+        break;
+    }
 }
 
-const { page, allPages } = Astro.props;
+if (!page) {
+    return Astro.redirect("/404");
+}
+
 const pageModule = (await page()) as {
     Content: any;
     getHeadings?:
@@ -34,7 +35,7 @@ const pageHeadings = headingCandidates.filter(
     (heading) => heading.depth >= 1 && heading.depth <= 3,
 );
 
-const navLinks = Object.keys(allPages)
+const navLinks = Object.keys(wikiPages)
     .filter((path) => {
         const fileName = path.split("/").pop()!;
         return !fileName.startsWith("_") && fileName.endsWith(".md");

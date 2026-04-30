@@ -7,7 +7,7 @@ export default function RuleEditorModeButton({ mode, icon, currentMode, setMode 
     const isActive = currentMode === mode;
 
     const style: React.CSSProperties = {
-        padding: isHovered || isActive ? '6px' : '8px',
+        padding: 'clamp(4px, 1.5vw, 8px)',
         borderRadius: '4px',
         backgroundColor: '#010101',
         color: isActive ? '#fff' : '#888',
@@ -22,6 +22,8 @@ export default function RuleEditorModeButton({ mode, icon, currentMode, setMode 
         textAlign: 'center',
         justifyContent: 'center',
         width: '100%',
+        fontSize: 'clamp(0.75rem, 1.2vw, 0.9rem)',
+        minHeight: '40px',
     }
 
     let textMode: string;
@@ -29,7 +31,7 @@ export default function RuleEditorModeButton({ mode, icon, currentMode, setMode 
 
 
     return <button style={style} onMouseEnter={() => setIsHovered(true)} onMouseLeave={() => setIsHovered(false)} onClick={() => setMode(mode)}>
-        <div>{icon}</div>
+        <div style={{ fontSize: 'clamp(1.2rem, 2vw, 1.5rem)' }}>{icon}</div>
         <div>{textMode}</div>
     </button>
 }
