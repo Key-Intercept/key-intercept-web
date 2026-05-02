@@ -79,7 +79,7 @@ export default function SelectedRule({
 	}
 
 	function setLabelProp(label: string) {
-		setLocalRule((prev) => (prev ? { ...prev, rule_label: label } : null));
+		setLocalRule((prev) => (prev ? { ...prev, label: label } : null));
 	}
 
 	const editorComponent = () => {
