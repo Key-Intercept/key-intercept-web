@@ -15,12 +15,8 @@ export default function SubRuleEditor({
     setLabel: (label: string) => void;
 }) {
     function handleRegexChange(value: string) {
-        if (value === "") {
-            setRegex(new RegExp("^([\\s\\S]*)$"));
-        } else {
             setRegex(new RegExp(`^([\\s\\S]*${value}[\\s\\S]*)$`));
-        }
-        setReplacement("-#$1");
+        setReplacement(`-#${value}`);
         setLabel(`Subtext: "${value}"`);
     }
 

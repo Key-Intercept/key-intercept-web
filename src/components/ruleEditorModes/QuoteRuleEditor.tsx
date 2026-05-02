@@ -15,12 +15,8 @@ export default function QuoteRuleEditor({
     setLabel: (label: string) => void;
 }) {
     function handleRegexChange(value: string) {
-        if (value === "") {
-            setRegex(new RegExp(".*"));
-        } else {
-            setRegex(new RegExp(`${value}`));
-        }
-        setReplacement("> $1");
+        setRegex(new RegExp(`${value}`));
+        setReplacement(`> ${value}`);
         setLabel(`Quote: "${value}"`);
     }
 

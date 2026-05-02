@@ -15,12 +15,8 @@ export default function UnderlineRuleEditor({
     setLabel: (label: string) => void;
 }) {
     function handleRegexChange(value: string) {
-        if (value === "") {
-            setRegex(new RegExp(".*"));
-        } else {
             setRegex(new RegExp(`${value}`, "g"));
-        }
-        setReplacement("__$1__");
+        setReplacement(`__${value}__`);
         setLabel(`Underline: "${value}"`);
     }
 

@@ -15,12 +15,8 @@ export default function SpoilerRuleEditor({
     setLabel: (label: string) => void;
 }) {
     function handleRegexChange(value: string) {
-        if (value === "") {
-            setRegex(new RegExp(".*"));
-        } else {
-            setRegex(new RegExp(`${value}`, "g"));
-        }
-        setReplacement("||$1||");
+        setRegex(new RegExp(`${value}`, "g"));
+        setReplacement(`||${value}||`);
         setLabel(`Spoiler: "${value}"`);
     }
 

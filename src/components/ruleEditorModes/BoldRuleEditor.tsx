@@ -16,7 +16,7 @@ export default function BoldRuleEditor({
 }) {
     function handleRegexChange(value: string) {
         setRegex(new RegExp(value));
-        setReplacement("**$1**");
+        setReplacement(`**${value}**`);
         setLabel("Bold: " + value);
     }
 
