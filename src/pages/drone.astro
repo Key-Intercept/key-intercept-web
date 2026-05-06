@@ -1,0 +1,71 @@
+---
+export const prerender = false;
+
+import { createClient } from "@supabase/supabase-js";
+import Layout from "../layouts/mainPage.astro";
+import DronePageContainer from "../components/drone-page-container.tsx";
+import type { DroneConfig } from "../script/types";
+
+const title = "Drone";
+const queryParams = Astro.url.searchParams;
+
+if (!queryParams.has("config") || queryParams.get("config") === null) {
+    return Astro.redirect("/main");
+}
+
+const configID = BigInt(queryParams.get("config")!);
+
+const supabase = createClient(import.meta.env.SUPABASE_URL, import.meta.env.SUPABASE_SERVICE_KEY);
+const droneConfigDefaults: DroneConfig = {
+    config_id: configID,
+    drone_health: 100,
+    speech_header: "",
+    speech_footer: "",
+    action_header: "",
+    action_footer: "",
+    whisper_header: "",
+    whisper_footer: "",
+    loud_header: "",
+    loud_footer: "",
+};
+
+const { data: droneConfigData, error } = await supabase
+    .from("Drone_Config")
+    .select("*")
+    .eq("config_id", configID)
+    .maybeSingle();
+
+if (error) {
+    console.error("[supabase] Error fetching drone config:", error);
+    return Astro.redirect("/main");
+}
+
+const initialDroneConfig = droneConfigData
+    ? {
+        config_id: droneConfigData.config_id,
+        drone_health: droneConfigData.drone_health,
+        speech_header: droneConfigData.speech_header ?? "",
+        speech_footer: droneConfigData.speech_footer ?? "",
+        action_header: droneConfigData.action_header ?? "",
+        action_footer: droneConfigData.action_footer ?? "",
+        whisper_header: droneConfigData.whisper_header ?? "",
+        whisper_footer: droneConfigData.whisper_footer ?? "",
+        loud_header: droneConfigData.loud_header ?? "",
+        loud_footer: droneConfigData.loud_footer ?? "",
+    }
+    : droneConfigDefaults;
+
+if (!droneConfigData) {
+    const { error: insertError } = await supabase
+        .from("Drone_Config")
+        .insert(droneConfigDefaults);
+
+    if (insertError) {
+        console.error("[supabase] Error creating default drone config:", insertError);
+    }
+}
+---
+
+<Layout title={title}>
+    <DronePageContainer client:load initialDroneConfig={initialDroneConfig} />
+</Layout>
