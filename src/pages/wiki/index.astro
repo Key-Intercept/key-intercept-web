@@ -1,3 +1,7 @@
 ---
-return Astro.redirect("/wiki/home");
+const configParam = Astro.url.searchParams.get("config");
+const configQuerySuffix = configParam
+	? `?config=${encodeURIComponent(configParam)}`
+	: "";
+return Astro.redirect(`/wiki/home${configQuerySuffix}`);
 ---

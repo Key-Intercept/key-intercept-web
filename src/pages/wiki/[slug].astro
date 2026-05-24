@@ -59,6 +59,11 @@ const headingCandidates = pageModule.getHeadings
 const pageHeadings = headingCandidates.filter(
     (heading) => heading.depth >= 1 && heading.depth <= 3,
 );
+
+const configParam = Astro.url.searchParams.get("config");
+const configQuerySuffix = configParam
+    ? `?config=${encodeURIComponent(configParam)}`
+    : "";
 ---
 
 <Layout title="Wiki">
@@ -71,7 +76,7 @@ const pageHeadings = headingCandidates.filter(
                         navLinks.map((link) => (
                             <li>
                                 <a
-                                    href={`/wiki/${link.slug}`}
+                                    href={`/wiki/${link.slug}${configQuerySuffix}`}
                                     class={
                                         Astro.url.pathname ===
                                         `/wiki/${link.slug}`
@@ -119,6 +124,9 @@ const pageHeadings = headingCandidates.filter(
 </Layout>
 
 <script>
+    const currentConfig = new URLSearchParams(window.location.search).get(
+        "config",
+    );
     const links = document.querySelectorAll(".markdown-body a");
 
     links.forEach((link) => {
@@ -141,9 +149,13 @@ const pageHeadings = headingCandidates.filter(
             .replace(/^\.\.\//, "")
             .replace(/\.md$/i, "");
 
+        const queryPart = currentConfig
+            ? `?config=${encodeURIComponent(currentConfig)}`
+            : "";
+
         link.setAttribute(
             "href",
-            `/wiki/${cleanPath.toLowerCase()}${hashPart ? `#${hashPart}` : ""}`,
+            `/wiki/${cleanPath.toLowerCase()}${queryPart}${hashPart ? `#${hashPart}` : ""}`,
         );
     });
 </script>
