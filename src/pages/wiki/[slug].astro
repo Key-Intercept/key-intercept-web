@@ -1,30 +1,55 @@
 ---
-export const prerender = false;
 import Layout from "../../layouts/mainPage.astro";
 
-const { slug } = Astro.params;
-const wikiPages = import.meta.glob("../../data/wiki/*.md");
-
-let page;
-for (const path in wikiPages) {
-    const fileName = path.split("/").pop();
-    if (fileName && !fileName.startsWith("_") && fileName.replace(".md", "") === slug) {
-        page = wikiPages[path];
-        break;
-    }
-}
-
-if (!page) {
-    return Astro.redirect("/404");
-}
-
-const pageModule = (await page()) as {
+type WikiHeading = { depth: number; slug: string; text: string };
+type WikiPageModule = {
     Content: any;
     getHeadings?:
-        | (() => Array<{ depth: number; slug: string; text: string }>)
-        | (() => Promise<Array<{ depth: number; slug: string; text: string }>>);
-    headings?: Array<{ depth: number; slug: string; text: string }>;
+        | (() => Array<WikiHeading>)
+        | (() => Promise<Array<WikiHeading>>);
+    headings?: Array<WikiHeading>;
 };
+
+type WikiEntry = {
+    slug: string;
+    title: string;
+    module: WikiPageModule;
+};
+
+export function getStaticPaths() {
+    const wikiEntries = Object.entries(
+        import.meta.glob("../../data/wiki/*.md", { eager: true }),
+    )
+        .filter(([path]) => {
+            const fileName = path.split("/").pop() ?? "";
+            return !fileName.startsWith("_") && fileName.endsWith(".md");
+        })
+        .map(([path, module]) => {
+            const fileName = path.split("/").pop()!;
+            const sourceSlug = fileName.replace(".md", "");
+            return {
+                slug: sourceSlug.toLowerCase(),
+                title: sourceSlug.replace(/-/g, " "),
+                module: module as WikiPageModule,
+            };
+        })
+        .sort((a, b) => a.title.localeCompare(b.title));
+
+    return wikiEntries.map((entry) => ({
+        params: { slug: entry.slug },
+        props: {
+            entry,
+            navLinks: wikiEntries.map(({ slug, title }) => ({ slug, title })),
+        },
+    }));
+}
+
+const { entry, navLinks } = Astro.props as {
+    entry: WikiEntry;
+    navLinks: Array<{ slug: string; title: string }>;
+};
+
+const pageModule = entry.module;
 const { Content } = pageModule;
 
 const headingCandidates = pageModule.getHeadings
@@ -34,18 +59,6 @@ const headingCandidates = pageModule.getHeadings
 const pageHeadings = headingCandidates.filter(
     (heading) => heading.depth >= 1 && heading.depth <= 3,
 );
-
-const navLinks = Object.keys(wikiPages)
-    .filter((path) => {
-        const fileName = path.split("/").pop()!;
-        return !fileName.startsWith("_") && fileName.endsWith(".md");
-    })
-    .map((path) => {
-        const fileName = path.split("/").pop()!;
-        const slug = fileName.replace(".md", "");
-        const title = slug.replace(/-/g, " ");
-        return { slug, title };
-    });
 ---
 
 <Layout title="Wiki">
@@ -97,7 +110,7 @@ const navLinks = Object.keys(wikiPages)
         </aside>
 
         <main class="wiki-content">
-            <h1>{Astro.params.slug.replace(/-/g, " ")}</h1>
+            <h1>{entry.title}</h1>
             <div class="markdown-body">
                 <Content />
             </div>
@@ -130,7 +143,7 @@ const navLinks = Object.keys(wikiPages)
 
         link.setAttribute(
             "href",
-            `/wiki/${cleanPath}${hashPart ? `#${hashPart}` : ""}`,
+            `/wiki/${cleanPath.toLowerCase()}${hashPart ? `#${hashPart}` : ""}`,
         );
     });
 </script>
