@@ -9,19 +9,15 @@ import { SupabaseClient } from "@supabase/supabase-js";
 export default async function RulesPageContainer({
   initialRules,
   initialConfigId,
-  supabaseClient,
-}: {
+ }: {
   initialRules: Rule[];
   initialConfigId: string;
-  supabaseClient: SupabaseClient;
 }) {
   const [rules, setRules] = useState(
     initialRules.sort((a, b) => a.order - b.order),
   );
   const [selectedRule, setSelectedRule] = useState<Rule | null>(null);
   const currentConfigId = BigInt(initialConfigId);
-
-  const config = await supabaseClient.from("config").select("*").eq("id", currentConfigId).single();
 
   async function deleteRuleDatabase(id: bigint) {
     const res = await fetch(`/api/rules?id=${id}`, {
@@ -94,11 +90,11 @@ export default async function RulesPageContainer({
 
   return (
     <>
-      <Card title="Rules Enabled">
+      {/* <Card title="Rules Enabled">
         <ToggleSwitch onClick={ async (checked) => {
           await supabaseClient.from("config").update({ rules_end: checked ? Date.parse("9999-12-31T23:59:59Z") : "0001-01-01T00:00:00Z" }).eq("id", currentConfigId)
         }} />
-      </Card>
+      </Card> */}
       <SelectedRule
         i_selectedRule={selectedRule || null}
         defaultConfigId={currentConfigId}

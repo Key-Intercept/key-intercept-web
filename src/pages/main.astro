@@ -42,5 +42,5 @@ const initialRules: Rule[] = rulesData ? rulesData.map((rule) => ({
 ---
 
 <Layout title={title}>
-    <RulesPageContainer initialRules={initialRules} initialConfigId={configID.toString()} supabaseClient={supabase} client:load />
+    <RulesPageContainer initialRules={initialRules} initialConfigId={configID.toString()} client:load />
 </Layout>
