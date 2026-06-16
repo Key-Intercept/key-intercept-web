@@ -26,7 +26,7 @@ if (error) {
     console.error('[supabase] Error fetching rules:', error);
 }
 
-const initialRules = rulesData ? rulesData.map((rule) => ({
+const initialRules: Rule[] = rulesData ? rulesData.map((rule) => ({
     id: rule.id,
     created_at: new Date(rule.created_at),
     updated_at: new Date(rule.updated_at),
@@ -37,9 +37,10 @@ const initialRules = rulesData ? rulesData.map((rule) => ({
     chance_to_apply: rule.chance_to_apply,
     label: rule.label,
     order: rule.order,
+    regex_normalize: rule.regex_normalize,
 })) : [];
 ---
 
 <Layout title={title}>
-    <RulesPageContainer initialRules={initialRules} initialConfigId={configID.toString()} client:load />
+    <RulesPageContainer initialRules={initialRules} initialConfigId={configID.toString()} supabaseClient={supabase} client:load />
 </Layout>
