@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import type { Rule } from "../../script/types";
 import Checkbox from "./assets/Checkbox";
 import Label from "./assets/Label";
-import { normalizeRegexSource } from "./assets/regex";
+import { normalizeRegexSource, safeCreateRegex } from "./assets/regex";
 import Textbox from "./assets/Textbox";
 import DropDown from "./assets/Dropdown";
 
@@ -19,19 +19,19 @@ export default function LookaroundRuleEditor({ rule, setRegex, setReplacement, s
         let newRegex: RegExp;
         switch (lookaroundType) {
             case "It Is followed by":
-                newRegex = new RegExp(`${value}(?=${followingText})`);
+                newRegex = safeCreateRegex(`${value}(?=${followingText})`);
                 break;
             case "It Is NOT followed by":
-                newRegex = new RegExp(`${value}(?!${followingText})`);
+                newRegex = safeCreateRegex(`${value}(?!${followingText})`);
                 break;
             case "It Is preceded by":
-                newRegex = new RegExp(`(?<=${followingText})${value}`);
+                newRegex = safeCreateRegex(`(?<=${followingText})${value}`);
                 break;
             case "It Is NOT preceded by":
-                newRegex = new RegExp(`(?<!${followingText})${value}`);
+                newRegex = safeCreateRegex(`(?<!${followingText})${value}`);
                 break;
             default:
-                newRegex = new RegExp(value);
+                newRegex = safeCreateRegex(value);
         }
         setRegex(newRegex);
         setLabel(`If "${value}" ${lookaroundType.toLowerCase()} "${followingText}", replace with "${rule.rule_replacement}"`);

@@ -10,7 +10,7 @@ export default function Separator({color}: {color: string}) {
             x2="100%"
             y2="5"
             stroke={color}
-            stroke-width="2"
+            strokeWidth={2}
         />
     </svg>
 }

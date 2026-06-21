@@ -6,7 +6,7 @@ import SelectedRule from "./selectedRule";
 import ToggleSwitch from "./toggle_switch";
 import { SupabaseClient } from "@supabase/supabase-js";
 
-export default async function RulesPageContainer({
+export default function RulesPageContainer({
   initialRules,
   initialConfigId,
  }: {

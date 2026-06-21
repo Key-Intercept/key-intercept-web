@@ -5,6 +5,7 @@ import RuleEditorModeButton from "./ruleEditorModes/assets/RuleEditorModeButton"
 import { RuleType } from "../script/ruleTypes";
 import SwapRuleEditor from "./ruleEditorModes/SwapRuleEditor";
 import Separator from "./separator";
+import { safeCreateRegex } from "./ruleEditorModes/assets/regex";
 import LettersRuleEditor from "./ruleEditorModes/LettersRuleEditor";
 import PrefixRuleEditor from "./ruleEditorModes/PrefixRuleEditor";
 import SuffixRuleEditor from "./ruleEditorModes/SuffixRuleEditor";
@@ -50,7 +51,7 @@ export default function SelectedRule({
 		setLocalRule({
 			id: -1n,
 			config_id: defaultConfigId,
-			rule_regex: new RegExp(""),
+			rule_regex: safeCreateRegex(""),
 			rule_replacement: "",
 			enabled: true,
 			order: 0,
@@ -62,7 +63,7 @@ export default function SelectedRule({
 		selectedRule = {
 			id: -1n,
 			config_id: defaultConfigId,
-			rule_regex: new RegExp(""),
+			rule_regex: safeCreateRegex(""),
 			rule_replacement: "",
 			enabled: true,
 			order: 0,
@@ -71,15 +72,49 @@ export default function SelectedRule({
 	const isNewRule = !i_selectedRule || i_selectedRule.id === -1n;
 
 	function setRegexProp(regex: RegExp) {
-		setLocalRule((prev) => (prev ? { ...prev, rule_regex: regex } : null));
+			setLocalRule((prev) =>
+				prev
+					? { ...prev, rule_regex: regex }
+					: ({
+						  id: -1n,
+						  config_id: defaultConfigId,
+						  rule_regex: regex,
+						  rule_replacement: "",
+						  enabled: true,
+						  order: 0,
+					  } as Rule),
+			);
 	}
 
 	function setReplacementProp(replacement: string) {
-		setLocalRule((prev) => (prev ? { ...prev, rule_replacement: replacement } : null));
+			setLocalRule((prev) =>
+				prev
+					? { ...prev, rule_replacement: replacement }
+					: ({
+						  id: -1n,
+						  config_id: defaultConfigId,
+						  rule_regex: safeCreateRegex("") ,
+						  rule_replacement: replacement,
+						  enabled: true,
+						  order: 0,
+					  } as Rule),
+			);
 	}
 
 	function setLabelProp(label: string) {
-		setLocalRule((prev) => (prev ? { ...prev, label: label } : null));
+			setLocalRule((prev) =>
+				prev
+					? { ...prev, label: label }
+					: ({
+						  id: -1n,
+						  config_id: defaultConfigId,
+						  rule_regex: safeCreateRegex(""),
+						  rule_replacement: "",
+						  enabled: true,
+						  order: 0,
+						  label: label,
+					  } as Rule),
+			);
 	}
 
 	const editorComponent = () => {

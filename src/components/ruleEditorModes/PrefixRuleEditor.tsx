@@ -1,6 +1,7 @@
 import type { Rule } from "../../script/types";
 import Label from "./assets/Label";
 import Textbox from "./assets/Textbox";
+import { safeCreateRegex } from "./assets/regex";
 
 export default function PrefixRuleEditor({
     rule,
@@ -15,7 +16,7 @@ export default function PrefixRuleEditor({
 }) {
     function handleReplacementChange(value: string) {
         setReplacement(value);
-        setRegex(new RegExp("^"));
+        setRegex(safeCreateRegex("^"));
         setLabel(`Add "${value}" to start of message`);
     }
 

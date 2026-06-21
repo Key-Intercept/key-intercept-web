@@ -2,12 +2,12 @@ import { useState } from "react";
 import type { Rule } from "../../script/types";
 import Checkbox from "./assets/Checkbox";
 import Label from "./assets/Label";
-import { normalizeRegexSource } from "./assets/regex";
+import { normalizeRegexSource, safeCreateRegex } from "./assets/regex";
 import Textbox from "./assets/Textbox";
 
 export default function CustomRuleEditor({ rule, setRegex, setReplacement, setLabel }: { rule: Rule, setRegex: (regex: RegExp) => void, setReplacement: (replacement: string) => void, setLabel: (label: string) => void }) {
     function handleRegexChange(value: string) {
-        const newRegex = new RegExp(value);
+        const newRegex = safeCreateRegex(value);
         setRegex(newRegex);
         setLabel(value + " -> " + rule.rule_replacement);
     }
