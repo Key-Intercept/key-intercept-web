@@ -1,6 +1,6 @@
 import type { Rule } from "../../script/types";
 import Label from "./assets/Label";
-import { normalizeRegexSource } from "./assets/regex";
+import { normalizeRegexSource, safeCreateRegex } from "./assets/regex";
 import Textbox from "./assets/Textbox";
 
 export default function LettersRuleEditor({
@@ -15,7 +15,7 @@ export default function LettersRuleEditor({
     setLabel: (label: string) => void;
 }) {
     function handleRegexChange(value: string) {
-        const newRegex = new RegExp(value);
+        const newRegex = safeCreateRegex(value);
         setRegex(newRegex);
         setLabel(value + " -> " + rule.rule_replacement);
     }

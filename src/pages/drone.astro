@@ -27,6 +27,7 @@ const droneConfigDefaults: DroneConfig = {
     whisper_footer: "",
     loud_header: "",
     loud_footer: "",
+    drone_term: "",
 };
 
 const { data: droneConfigData, error } = await supabase
@@ -51,7 +52,8 @@ const initialDroneConfig = droneConfigData
         whisper_header: droneConfigData.whisper_header ?? "",
         whisper_footer: droneConfigData.whisper_footer ?? "",
         loud_header: droneConfigData.loud_header ?? "",
-        loud_footer: droneConfigData.loud_footer ?? "",
+	loud_footer: droneConfigData.loud_footer ?? "",
+	drone_term: droneConfigData.drone_term ?? "",
     }
     : droneConfigDefaults;
 
@@ -68,4 +70,4 @@ if (!droneConfigData) {
 
 <Layout title={title}>
     <DronePageContainer client:load initialDroneConfig={initialDroneConfig} />
-</Layout>
+</Layout">

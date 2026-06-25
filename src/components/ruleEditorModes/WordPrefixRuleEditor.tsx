@@ -1,6 +1,7 @@
 import type { Rule } from "../../script/types";
 import Label from "./assets/Label";
 import Textbox from "./assets/Textbox";
+import { safeCreateRegex } from "./assets/regex";
 
 export default function WordPrefixRuleEditor({
     rule,
@@ -15,7 +16,7 @@ export default function WordPrefixRuleEditor({
 }) {
     function handleReplacementChange(value: string) {
         setReplacement(value + "$1");
-        setRegex(new RegExp("\b\w+\b"));
+        setRegex(safeCreateRegex("\\b\\w+\\b"));
         setLabel(`Word Prefix: "${value}"`);
     }
 

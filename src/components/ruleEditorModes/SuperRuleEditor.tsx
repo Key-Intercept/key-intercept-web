@@ -1,6 +1,6 @@
 import type { Rule } from "../../script/types";
 import Label from "./assets/Label";
-import { normalizeRegexSource } from "./assets/regex";
+import { normalizeRegexSource, safeCreateRegex } from "./assets/regex";
 import Textbox from "./assets/Textbox";
 
 export default function SuperRuleEditor({
@@ -15,7 +15,7 @@ export default function SuperRuleEditor({
     setLabel: (label: string) => void;
 }) {
     function handleRegexChange(value: string) {
-            setRegex(new RegExp(`^([\\s\\S]*${value}[\\s\\S]*)$`));
+            setRegex(safeCreateRegex(`^([\\s\\S]*${value}[\\s\\S]*)$`));
         setReplacement(`# ${value}`);
         setLabel(`Heading: "${value}"`);
     }

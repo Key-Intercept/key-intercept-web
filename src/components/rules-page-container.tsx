@@ -9,68 +9,74 @@ export default function RulesPageContainer({ initialRules, initialConfigId, init
 	const [selectedRule, setSelectedRule] = useState<Rule | null>(null);
 	const currentConfigId = BigInt(initialConfigId);
 
-	async function deleteRuleDatabase(id: bigint) {
-		const res = await fetch(`/api/rules?id=${id}`, {
-			method: 'DELETE'
-		});
+  async function deleteRuleDatabase(id: bigint) {
+    const res = await fetch(`/api/rules?id=${id}`, {
+      method: "DELETE",
+    });
 
-		if (!res.ok) {
-			console.error("Error deleting rule:", await res.text());
-			await alert("An error occurred while deleting the rule. Please try again.");
-		}
-	}
+    if (!res.ok) {
+      console.error("Error deleting rule:", await res.text());
+      await alert(
+        "An error occurred while deleting the rule. Please try again.",
+      );
+    }
+  }
 
-	async function updateRuleDatabase(rule: Rule) {
-		const payload = {
-			...rule,
-			// convert RegExp source '(?:)' (from new RegExp('')) to empty string
-			rule_regex: rule.rule_regex.source === '(?:)' ? '' : rule.rule_regex.source,
-			id: rule.id.toString(), // Convert BigInt to string for JSON serialization
-			config_id: rule.config_id.toString()
-		};
+  async function updateRuleDatabase(rule: Rule) {
+    const payload = {
+      ...rule,
+      // convert RegExp source '(?:)' (from new RegExp('')) to empty string
+      rule_regex:
+        rule.rule_regex.source === "(?:)" ? "" : rule.rule_regex.source,
+      id: rule.id.toString(), // Convert BigInt to string for JSON serialization
+      config_id: rule.config_id.toString(),
+    };
 
-		const res = await fetch('/api/rules', {
-			method: 'PUT',
-			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify(payload)
-		});
+    const res = await fetch("/api/rules", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
 
-		if (!res.ok) {
-			console.error("Error updating rule:", await res.text());
-			await alert("An error occurred while updating the rule. Please try again.");
-		}
-		setRules(prevRules => {
-			const updatedRules = prevRules.map(r => r.id === rule.id ? rule : r);
-			return updatedRules.sort((a, b) => a.order - b.order);
-		});
-	}
+    if (!res.ok) {
+      console.error("Error updating rule:", await res.text());
+      await alert(
+        "An error occurred while updating the rule. Please try again.",
+      );
+    }
+    setRules((prevRules) => {
+      const updatedRules = prevRules.map((r) => (r.id === rule.id ? rule : r));
+      return updatedRules.sort((a, b) => a.order - b.order);
+    });
+  }
 
-	async function addNewRuleDatabase(rule: Rule) {
-		// Prepare rule for JSON
-		const { id: _id, config_id: _configId, ...ruleData } = rule;
-		const payload = {
-			...ruleData,
-			// convert RegExp source '(?:)' (from new RegExp('')) to empty string
-			rule_regex: rule.rule_regex.source === '(?:)' ? '' : rule.rule_regex.source,
-			config_id: currentConfigId.toString()
-		};
+  async function addNewRuleDatabase(rule: Rule) {
+    // Prepare rule for JSON
+    const { id: _id, config_id: _configId, ...ruleData } = rule;
+    const payload = {
+      ...ruleData,
+      // convert RegExp source '(?:)' (from new RegExp('')) to empty string
+      rule_regex:
+        rule.rule_regex.source === "(?:)" ? "" : rule.rule_regex.source,
+      config_id: currentConfigId.toString(),
+    };
 
-		const res = await fetch('/api/rules', {
-			method: 'POST',
-			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify(payload)
-		});
+    const res = await fetch("/api/rules", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
 
-		if (!res.ok) {
-			console.error("Error adding new rule:", await res.text());
-			await alert("An error occurred while adding the rule. Please try again.");
-		}
+    if (!res.ok) {
+      console.error("Error adding new rule:", await res.text());
+      await alert("An error occurred while adding the rule. Please try again.");
+    }
 
-		setRules(prevRules => {
-			const newRule = { ...rule, id: BigInt(-1) }; // Temporary ID until we get the real one from the server
-			return [...prevRules, newRule].sort((a, b) => a.order - b.order);
-		});
-	}
+    setRules((prevRules) => {
+      const newRule = { ...rule, id: BigInt(-1) }; // Temporary ID until we get the real one from the server
+      return [...prevRules, newRule].sort((a, b) => a.order - b.order);
+    });
+  }
 
 	return (
 		<>

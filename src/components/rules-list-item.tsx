@@ -2,6 +2,7 @@ import type { Rule } from "../script/types";
 import { useState } from "react";
 import RulesListItemButton from "./rules-list-item-button";
 import { canHaveDecorators } from "typescript";
+import { normalizeRegexSource } from "./ruleEditorModes/assets/regex";
 
 export default function RulesListItem({ rule, selected, onDelete, onToggled, onIncrement, onDecrement, onSetChance, onSelected }: { rule: Rule, selected: boolean, onDelete: (id: bigint) => void, onToggled: (id: bigint) => void, onIncrement: (id: bigint) => void, onDecrement: (id: bigint) => void, onSetChance: (id: bigint, chance: number) => void, onSelected: (Rule: Rule) => void }) {
 const [hovered, setHovered] = useState(false);
@@ -77,7 +78,7 @@ const [EditChancePressed, setEditChancePressed] = useState(false);
                 {rule.label}
             </div>
             <div style={regexStyle}>
-                {rule.rule_regex.source} → {rule.rule_replacement}
+                {normalizeRegexSource(rule.rule_regex.source)} → {rule.rule_replacement}
             </div>
         </div>
         {EditChancePressed && (

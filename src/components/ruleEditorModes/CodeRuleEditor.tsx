@@ -1,6 +1,6 @@
 import type { Rule } from "../../script/types";
 import Label from "./assets/Label";
-import { normalizeRegexSource } from "./assets/regex";
+import { normalizeRegexSource, safeCreateRegex } from "./assets/regex";
 import Textbox from "./assets/Textbox";
 
 export default function CodeRuleEditor({
@@ -15,7 +15,7 @@ export default function CodeRuleEditor({
     setLabel: (label: string) => void;
 }) {
     function handleRegexChange(value: string) {
-            setRegex(new RegExp(`${value}`, "g"));
+            setRegex(safeCreateRegex(`${value}`, "g"));
         setReplacement("`" + value + "`");
         setLabel("Code: " + value);
     }
