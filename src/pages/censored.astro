@@ -1,0 +1,48 @@
+---
+export const prerender = false;
+
+import { createClient } from "@supabase/supabase-js";
+import Layout from "../layouts/mainPage.astro";
+import TurnOnTimer from "../components/turn-on-timer";
+import CensoredWordsEditor from "../components/censored-words-editor";
+
+const title = "Censored";
+const queryParams = Astro.url.searchParams;
+
+if (!queryParams.has("config") || queryParams.get("config") === null) {
+  return Astro.redirect("/main");
+}
+
+const configID = BigInt(queryParams.get("config")!);
+
+const supabase = createClient(import.meta.env.SUPABASE_URL, import.meta.env.SUPABASE_SERVICE_KEY);
+
+const { data: configData, error: configError } = await supabase.from("Config").select("*").eq("id", configID).maybeSingle();
+
+if (configError) {
+  console.error("[supabase] Error fetching censored config:", configError);
+  return Astro.redirect("/main");
+}
+
+if (!configData) {
+  return Astro.redirect("/main");
+}
+
+const { data: wordsData, error: wordsError } = await supabase.from("Censored_Words").select("*").eq("config_id", configID).order("id", { ascending: true });
+
+if (wordsError) {
+  console.error("[supabase] Error fetching censored words:", wordsError);
+  return Astro.redirect("/main");
+}
+---
+
+<Layout title={title}>
+  <TurnOnTimer client:load title={"Censored End"} configId={configData.id} endField="censored_end" initialEnd={configData.censored_end} />
+
+  <CensoredWordsEditor
+    client:load
+    configId={configData.id}
+    initialReplacement={configData.censored_replacement ?? ""}
+    initialWords={(wordsData ?? []).map((w) => ({ id: w.id, word: w.word }))}
+  />
+</Layout>

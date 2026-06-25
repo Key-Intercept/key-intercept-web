@@ -1,0 +1,30 @@
+---
+export const prerender = false;
+
+import { createClient } from "@supabase/supabase-js";
+import Layout from "../layouts/mainPage.astro";
+import type { Config } from "../script/types";
+import TurnOnTimer from "../components/turn-on-timer";
+
+const title = "Gag";
+const queryParams = Astro.url.searchParams;
+
+if (!queryParams.has("config") || queryParams.get("config") === null) {
+    return Astro.redirect("/main");
+}
+
+const configID = BigInt(queryParams.get("config")!);
+
+const supabase = createClient(import.meta.env.SUPABASE_URL, import.meta.env.SUPABASE_SERVICE_KEY);
+
+const {data: configData, error: configError } = await supabase.from("Config").select("*").eq("id", configID).maybeSingle();
+
+if (configError) {
+    console.error("[supabase] Error fetching drone config:", configError);
+    return Astro.redirect("/main");
+    }
+---
+
+<Layout title={title}>
+<TurnOnTimer title={"Gag End"} configId={configData.id} endField="gag_end" initialEnd={configData.gag_end} />
+</Layout">

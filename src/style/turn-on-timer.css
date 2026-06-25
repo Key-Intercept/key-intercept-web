@@ -1,0 +1,97 @@
+/* Styles for TurnOnTimer component */
+.turn-on-timer {
+  display: grid;
+  gap: 0.75rem;
+  font-family: inherit;
+}
+
+.tot-header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.tot-label {
+  font-size: 0.9rem;
+  opacity: 0.8;
+}
+
+.tot-remaining {
+  font-size: 1.5rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--ti-accent, #111);
+}
+
+.tot-current-end {
+  font-size: 0.9rem;
+  opacity: 0.8;
+}
+
+.tot-form {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.tot-fields {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.tot-field {
+  display: grid;
+  gap: 0.35rem;
+  min-width: 7rem;
+}
+
+.tot-field-label {
+  font-size: 0.9rem;
+}
+
+.tot-input {
+  padding: 0.35rem 0.5rem;
+  border: 1px solid #d0d0d0;
+  border-radius: 6px;
+  background: var(--ti-input-bg, #fff);
+  color: inherit;
+  outline: none;
+}
+
+.tot-input:disabled {
+  opacity: 0.6;
+}
+
+.tot-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.tot-checkbox-label {
+  font-size: 0.95rem;
+}
+
+.tot-button {
+  padding: 0.6rem 0.9rem;
+  border: none;
+  background: linear-gradient(180deg, #2c7be5, #1f6fd6);
+  color: white;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.tot-button:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+@media (max-width: 520px) {
+  .tot-fields {
+    gap: 0.5rem;
+  }
+  .tot-field {
+    min-width: 6rem;
+  }
+}

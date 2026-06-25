@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import type { Config } from "../script/types";
 import Card from "./card";
+import "../style/turn-on-timer.css";
 
 const MAX_END_AT = new Date("9999-12-31T23:59:59.999Z");
 
@@ -64,7 +65,10 @@ export default function TurnOnTimer({
   }, []);
 
   const remainingMs = endAt.getTime() - now;
-  const remainingText = useMemo(() => formatRemainingTime(remainingMs), [remainingMs]);
+  const remainingText = useMemo(
+    () => formatRemainingTime(remainingMs),
+    [remainingMs],
+  );
   const isExpired = remainingMs <= 0 && !isPermanent;
   const totalDurationMs =
     toNumber(daysToSet) * 24 * 60 * 60 * 1000 +
@@ -79,7 +83,7 @@ export default function TurnOnTimer({
       ? MAX_END_AT
       : new Date(Date.now() + totalDurationMs);
 
-    if (!isPermanent && totalDurationMs <= 0) {
+    if (!isPermanent && totalDurationMs < 0) {
       await alert("Enter a positive duration to set the end time.");
       return;
     }
@@ -98,7 +102,9 @@ export default function TurnOnTimer({
 
       if (!res.ok) {
         console.error("Error updating config end field:", await res.text());
-        await alert("An error occurred while updating the end time. Please try again.");
+        await alert(
+          "An error occurred while updating the end time. Please try again.",
+        );
         return;
       }
 
@@ -111,83 +117,83 @@ export default function TurnOnTimer({
 
   return (
     <Card title={title}>
-      <div style={{ display: "grid", gap: "0.75rem" }}>
-        <div>
-          <div style={{ fontSize: "0.9rem", opacity: 0.8 }}>Time remaining</div>
-          <div style={{ fontSize: "1.5rem", fontWeight: 700, fontVariantNumeric: "tabular-nums" }}>
+      <div className="turn-on-timer">
+        <div className="tot-header">
+          <div className="tot-label">Time remaining</div>
+          <div className="tot-remaining">
             {isPermanent ? "Permanent" : isExpired ? "00:00:00" : remainingText}
           </div>
         </div>
 
-        <div style={{ fontSize: "0.9rem", opacity: 0.8 }}>
+        <div className="tot-current-end">
           Current end: {isPermanent ? "Permanent" : endAt.toLocaleString()}
         </div>
 
-        <form onSubmit={setEndTime} style={{ display: "grid", gap: "0.75rem" }}>
-          <div style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap" }}>
-            <label style={{ display: "grid", gap: "0.35rem" }}>
-              <span style={{ fontSize: "0.9rem" }}>Days</span>
+        <form onSubmit={setEndTime} className="tot-form">
+          <div className="tot-fields">
+            <label className="tot-field">
+              <span className="tot-field-label">Days</span>
               <input
+                className="tot-input"
                 type="number"
                 min="0"
                 step="1"
                 value={daysToSet}
                 onChange={(event) => setDaysToSet(event.target.value)}
                 disabled={isPermanent}
-                style={{ minWidth: "7rem" }}
               />
             </label>
 
-            <label style={{ display: "grid", gap: "0.35rem" }}>
-              <span style={{ fontSize: "0.9rem" }}>Hours</span>
+            <label className="tot-field">
+              <span className="tot-field-label">Hours</span>
               <input
+                className="tot-input"
                 type="number"
                 min="0"
                 step="1"
                 value={hoursToSet}
                 onChange={(event) => setHoursToSet(event.target.value)}
                 disabled={isPermanent}
-                style={{ minWidth: "7rem" }}
               />
             </label>
 
-            <label style={{ display: "grid", gap: "0.35rem" }}>
-              <span style={{ fontSize: "0.9rem" }}>Minutes</span>
+            <label className="tot-field">
+              <span className="tot-field-label">Minutes</span>
               <input
+                className="tot-input"
                 type="number"
                 min="0"
                 step="1"
                 value={minutesToSet}
                 onChange={(event) => setMinutesToSet(event.target.value)}
                 disabled={isPermanent}
-                style={{ minWidth: "7rem" }}
               />
             </label>
 
-            <label style={{ display: "grid", gap: "0.35rem" }}>
-              <span style={{ fontSize: "0.9rem" }}>Seconds</span>
+            <label className="tot-field">
+              <span className="tot-field-label">Seconds</span>
               <input
+                className="tot-input"
                 type="number"
                 min="0"
                 step="1"
                 value={secondsToSet}
                 onChange={(event) => setSecondsToSet(event.target.value)}
                 disabled={isPermanent}
-                style={{ minWidth: "7rem" }}
               />
             </label>
           </div>
 
-          <label style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+          <label className="tot-checkbox">
             <input
               type="checkbox"
               checked={isPermanent}
               onChange={(event) => setIsPermanent(event.target.checked)}
             />
-            <span style={{ fontSize: "0.95rem" }}>Turn on permanently</span>
+            <span className="tot-checkbox-label">Turn on permanently</span>
           </label>
 
-          <button type="submit" disabled={isSaving}>
+          <button type="submit" className="tot-button" disabled={isSaving}>
             {isSaving ? "Saving..." : isPermanent ? "Set permanent" : "Set end time"}
           </button>
         </form>

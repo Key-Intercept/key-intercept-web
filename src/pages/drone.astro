@@ -4,7 +4,7 @@ export const prerender = false;
 import { createClient } from "@supabase/supabase-js";
 import Layout from "../layouts/mainPage.astro";
 import DronePageContainer from "../components/drone-page-container.tsx";
-import type { DroneConfig } from "../script/types";
+import type { Config, DroneConfig } from "../script/types";
 
 const title = "Drone";
 const queryParams = Astro.url.searchParams;
@@ -39,7 +39,14 @@ const { data: droneConfigData, error } = await supabase
 if (error) {
     console.error("[supabase] Error fetching drone config:", error);
     return Astro.redirect("/main");
-}
+    }
+
+const {data: configData, error: configError } = await supabase.from("Config").select("*").eq("id", configID).maybeSingle();
+
+if (configError) {
+    console.error("[supabase] Error fetching drone config:", configError);
+    return Astro.redirect("/main");
+    }
 
 const initialDroneConfig = droneConfigData
     ? {
@@ -69,5 +76,5 @@ if (!droneConfigData) {
 ---
 
 <Layout title={title}>
-    <DronePageContainer client:load initialDroneConfig={initialDroneConfig} />
+<DronePageContainer client:load initialDroneConfig={initialDroneConfig} initialDroneEnd={configData.drone_end} />
 </Layout">

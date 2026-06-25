@@ -1,0 +1,34 @@
+import { createClient } from '@supabase/supabase-js';
+import type { APIRoute } from 'astro';
+import { serializeForSupabase } from '../../script/serializeForSupabase';
+
+export const prerender = false;
+
+const supabase = createClient(
+  import.meta.env.SUPABASE_URL,
+  import.meta.env.SUPABASE_SERVICE_KEY
+);
+
+export const DELETE: APIRoute = async ({ request }) => {
+  const url = new URL(request.url);
+  const idStr = url.searchParams.get('id');
+  if (!idStr) return new Response('Missing id', { status: 400 });
+
+  const { error } = await supabase.from('Censored_Words').delete().eq('id', idStr);
+  if (error) return new Response(error.message, { status: 500 });
+  return new Response('OK', { status: 200 });
+};
+
+export const POST: APIRoute = async ({ request }) => {
+  try {
+    const body = await request.json();
+    const { id: _id, ...insertData } = body;
+    const serializedBody = serializeForSupabase(insertData);
+
+    const { error } = await supabase.from('Censored_Words').insert(serializedBody);
+    if (error) return new Response(error.message, { status: 500 });
+    return new Response('OK', { status: 200 });
+  } catch (err: any) {
+    return new Response(err.message, { status: 500 });
+  }
+};

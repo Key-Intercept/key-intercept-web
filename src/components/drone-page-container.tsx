@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import Card from "./card";
 import type { DroneConfig } from "../script/types";
+import TurnOnTimer from "./turn-on-timer";
 
 type DroneFieldKey =
   | "speech_header"
@@ -37,8 +38,10 @@ function randomDelta() {
 
 export default function DronePageContainer({
   initialDroneConfig,
+  initialDroneEnd,
 }: {
   initialDroneConfig: DroneConfig;
+  initialDroneEnd: string;
 }) {
   const [droneConfig, setDroneConfig] =
     useState<DroneConfigState>(initialDroneConfig);
@@ -170,6 +173,13 @@ export default function DronePageContainer({
 
   return (
     <div style={wrapperStyle}>
+      <TurnOnTimer
+        title={"Drone Ends After"}
+        configId={droneConfig.config_id}
+        endField={"drone_end"}
+        initialEnd={initialDroneEnd}
+      />
+
       <Card title="Drone Health">
         <div style={cardContentStyle}>
           <p style={healthValueStyle}>{healthLabel}</p>
@@ -232,4 +242,3 @@ export default function DronePageContainer({
     </div>
   );
 }
-

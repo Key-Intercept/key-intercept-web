@@ -1,0 +1,69 @@
+---
+export const prerender = false;
+
+import { createClient } from "@supabase/supabase-js";
+import Layout from "../layouts/mainPage.astro";
+import TurnOnTimer from "../components/turn-on-timer";
+import PetSettingsEditor from "../components/pet-settings-editor";
+
+const title = "Pet";
+const queryParams = Astro.url.searchParams;
+
+if (!queryParams.has("config") || queryParams.get("config") === null) {
+    return Astro.redirect("/main");
+}
+
+const configID = BigInt(queryParams.get("config")!);
+
+const supabase = createClient(import.meta.env.SUPABASE_URL, import.meta.env.SUPABASE_SERVICE_KEY);
+
+const { data: configData, error: configError } = await supabase
+    .from("Config")
+    .select("*")
+    .eq("id", configID)
+    .maybeSingle();
+
+if (configError) {
+    console.error("[supabase] Error fetching pet config:", configError);
+    return Astro.redirect("/main");
+    }
+
+if (!configData) {
+    return Astro.redirect("/main");
+}
+
+const { data: petTypesData, error: petTypesError } = await supabase
+    .from("Pet_Types")
+    .select("*")
+    .order("id", { ascending: true });
+
+if (petTypesError) {
+    console.error("[supabase] Error fetching pet types:", petTypesError);
+    return Astro.redirect("/main");
+}
+
+const petTypes = (petTypesData ?? []).map((petType) => {
+    const label =
+        (typeof petType.display_name === "string" && petType.display_name.trim()) ||
+        (typeof petType.name === "string" && petType.name.trim()) ||
+        (typeof petType.label === "string" && petType.label.trim()) ||
+        (typeof petType.pet_type === "string" && petType.pet_type.trim()) ||
+        String(petType.id);
+
+    return {
+        id: String(petType.id),
+        label,
+    };
+});
+---
+
+<Layout title={title}>
+    <TurnOnTimer title={"Pet End"} configId={configData.id} endField="pet_end" initialEnd={configData.pet_end} client:load />
+    <PetSettingsEditor
+        client:load
+        configId={configData.id}
+        initialPetTypeId={configData.pet_type ?? null}
+        initialPetAmount={configData.pet_amount ?? 0}
+        petTypes={petTypes}
+    />
+</Layout>
