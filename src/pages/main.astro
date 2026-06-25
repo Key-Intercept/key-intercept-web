@@ -17,6 +17,16 @@ const configID = BigInt(queryParams.get("config")!);
 const supabaseUrl = import.meta.env.SUPABASE_URL;
 const supabaseKey = import.meta.env.SUPABASE_SERVICE_KEY;
 const supabase = createClient(supabaseUrl, supabaseKey);
+const { data: configData, error: configError } = await supabase
+    .from('Config')
+    .select('id, rules_end')
+    .eq('id', configID)
+    .single();
+
+if (configError) {
+    console.error('[supabase] Error fetching config:', configError);
+}
+
 const { data: rulesData, error } = await supabase
     .from('Rules')
     .select('*')
@@ -38,8 +48,10 @@ const initialRules = rulesData ? rulesData.map((rule) => ({
     label: rule.label,
     order: rule.order,
 })) : [];
+
+const initialRulesEnd = configData?.rules_end ? new Date(configData.rules_end).toISOString() : new Date().toISOString();
 ---
 
 <Layout title={title}>
-    <RulesPageContainer initialRules={initialRules} initialConfigId={configID.toString()} client:load />
+    <RulesPageContainer initialRules={initialRules} initialConfigId={configID.toString()} initialRulesEnd={initialRulesEnd} client:load />
 </Layout>

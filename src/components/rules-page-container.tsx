@@ -1,11 +1,11 @@
-import { useState, useMemo } from "react";
+import { useState } from "react";
 import type { Rule } from "../script/types";
 import RulesList from "./rules-list";
-import Card from "./card";
 import SelectedRule from "./selectedRule";
+import TurnOnTimer from "./turn-on-timer";
 
-export default function RulesPageContainer({ initialRules, initialConfigId }: { initialRules: Rule[]; initialConfigId: string }) {
-	const [rules, setRules] = useState(initialRules.sort((a, b) => a.order - b.order));
+export default function RulesPageContainer({ initialRules, initialConfigId, initialRulesEnd }: { initialRules: Rule[]; initialConfigId: string; initialRulesEnd: string }) {
+	const [rules, setRules] = useState([...initialRules].sort((a, b) => a.order - b.order));
 	const [selectedRule, setSelectedRule] = useState<Rule | null>(null);
 	const currentConfigId = BigInt(initialConfigId);
 
@@ -74,6 +74,7 @@ export default function RulesPageContainer({ initialRules, initialConfigId }: { 
 
 	return (
 		<>
+		<TurnOnTimer title={"Rules End After"} configId={currentConfigId} endField={"rules_end"} initialEnd={initialRulesEnd} />
 			<SelectedRule i_selectedRule={selectedRule || null} defaultConfigId={currentConfigId} setRule={(rule) => {
 				setSelectedRule(rule)
 				if (rule!.id === -1n) {
