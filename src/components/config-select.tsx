@@ -38,7 +38,7 @@ export default async function ConfigSelect({
     return errorOccurred("--- Error loading configs ---");
   }
 
-  const configs = [...(domConfigs ?? []), ...(subConfigs ?? [])];
+  const configs = [...(domConfigs ?? [])];
 
   const uniqueConfigs = [
     ...new Map(configs.map((config) => [config.config_id, config])).values(),
