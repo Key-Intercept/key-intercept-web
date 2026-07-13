@@ -5,7 +5,7 @@ import "../style/turn-on-timer.css";
 
 const MAX_END_AT = new Date("9999-12-31T23:59:59.999Z");
 
-function formatRemainingTime(remainingMs: number) {
+export function formatRemainingTime(remainingMs: number) {
   const clampedMs = Math.max(0, remainingMs);
   const totalSeconds = Math.floor(clampedMs / 1000);
   const hours = Math.floor(totalSeconds / 3600);
@@ -194,7 +194,11 @@ export default function TurnOnTimer({
           </label>
 
           <button type="submit" className="tot-button" disabled={isSaving}>
-            {isSaving ? "Saving..." : isPermanent ? "Set permanent" : "Set end time"}
+            {isSaving
+              ? "Saving..."
+              : isPermanent
+                ? "Set permanent"
+                : "Set end time"}
           </button>
         </form>
       </div>

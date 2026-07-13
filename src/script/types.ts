@@ -17,6 +17,15 @@ export type Config = {
   debug: boolean;
 };
 
+export type RuleGroup = {
+  id: bigint;
+  created_at: Date;
+  name: string;
+  config_id: bigint;
+  disabled_at: Date;
+  rules: Rule[];
+};
+
 export type Rule = {
   id: bigint;
   created_at: Date;

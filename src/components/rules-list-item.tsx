@@ -4,102 +4,140 @@ import RulesListItemButton from "./rules-list-item-button";
 import { canHaveDecorators } from "typescript";
 import { normalizeRegexSource } from "./ruleEditorModes/assets/regex";
 
-export default function RulesListItem({ rule, selected, onDelete, onToggled, onIncrement, onDecrement, onSetChance, onSelected }: { rule: Rule, selected: boolean, onDelete: (id: bigint) => void, onToggled: (id: bigint) => void, onIncrement: (id: bigint) => void, onDecrement: (id: bigint) => void, onSetChance: (id: bigint, chance: number) => void, onSelected: (Rule: Rule) => void }) {
-const [hovered, setHovered] = useState(false);
-const [EditChancePressed, setEditChancePressed] = useState(false);
+export default function RulesListItem({
+  rule,
+  selected,
+  onDelete,
+  onToggled,
+  onIncrement,
+  onDecrement,
+  onSetChance,
+  onSelected,
+}: {
+  rule: Rule;
+  selected: boolean;
+  onDelete: (id: bigint) => void;
+  onToggled: (id: bigint) => void;
+  onIncrement: (id: bigint) => void;
+  onDecrement: (id: bigint) => void;
+  onSetChance: (id: bigint, chance: number) => void;
+  onSelected: (Rule: Rule) => void;
+}) {
+  const [hovered, setHovered] = useState(false);
+  const [EditChancePressed, setEditChancePressed] = useState(false);
 
+  const containerStyle: React.CSSProperties = {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    padding: `${selected || hovered ? "10px" : "12px"}`,
+    marginBottom: "10px",
+    border: `${selected || hovered ? "2px" : "0px"} solid ${hovered ? "#ccc" : "#7700ff"}`,
+    borderRadius: "20px",
+    flexDirection: "row",
+    gap: "10px",
+    width: "100%",
+    maxWidth: "40vw",
+    minWidth: "280px",
+    backgroundColor: "#111111",
+    cursor: "pointer",
+    flexWrap: "wrap",
+  };
 
-    const containerStyle: React.CSSProperties = {
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        padding: `${selected || hovered ? '10px' : '12px'}`,
-        marginBottom: '10px',
-        border: `${selected || hovered ? '2px' : '0px'} solid ${hovered ? '#ccc' : '#7700ff'}`,
-        borderRadius: '20px',
-        flexDirection: 'row',
-        gap: '10px',
-        width: '100%',
-        maxWidth: '40vw',
-        minWidth: '280px',
-        backgroundColor:'#111111',
-        cursor: 'pointer',
-        flexWrap: 'wrap',
-    }
+  const textContainerStyle: React.CSSProperties = {
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "flex-start",
+    justifyContent: "center",
+    flex: 1,
+    marginLeft: "10px",
+    marginRight: "10px",
+    minWidth: "150px",
+    overflow: "hidden",
+  };
 
-    const textContainerStyle: React.CSSProperties = {
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'flex-start',
-        justifyContent: 'center',
-        flex: 1,
-        marginLeft: '10px',
-        marginRight: '10px',
-        minWidth: '150px',
-        overflow: 'hidden',
-    }
+  const labelStyle: React.CSSProperties = {
+    fontWeight: "bold",
+    fontSize: "clamp(0.9rem, 2vw, 1rem)",
+    textDecoration: rule.enabled ? "none" : "line-through",
+    overflow: "hidden",
+    textOverflow: "ellipsis",
+    whiteSpace: "nowrap",
+    width: "100%",
+  };
 
-    const labelStyle: React.CSSProperties = {
-        fontWeight: 'bold',
-        fontSize: 'clamp(0.9rem, 2vw, 1rem)',
-        textDecoration: rule.enabled ? 'none' : 'line-through',
-        overflow: 'hidden',
-        textOverflow: 'ellipsis',
-        whiteSpace: 'nowrap',
-        width: '100%',
-    }
+  const regexStyle: React.CSSProperties = {
+    fontStyle: "italic",
+    color: "#555",
+    textDecoration: rule.enabled ? "none" : "line-through",
+    fontSize: "clamp(0.85rem, 1.5vw, 0.95rem)",
+    overflow: "hidden",
+    textOverflow: "ellipsis",
+    whiteSpace: "nowrap",
+    width: "100%",
+  };
 
-    const regexStyle: React.CSSProperties = {
-        fontStyle: 'italic',
-        color: '#555',
-        textDecoration: rule.enabled ? 'none' : 'line-through',
-        fontSize: 'clamp(0.85rem, 1.5vw, 0.95rem)',
-        overflow: 'hidden',
-        textOverflow: 'ellipsis',
-        whiteSpace: 'nowrap',
-        width: '100%',
-    }
+  const EditChanceInputStyle: React.CSSProperties = {
+    width: "clamp(50px, 10vw, 80px)",
+    padding: "5px",
+    borderRadius: "5px",
+    border: "1px solid #ccc",
+    backgroundColor: "#222222",
+    color: "white",
+  };
 
-    const EditChanceInputStyle: React.CSSProperties = {
-        width: 'clamp(50px, 10vw, 80px)',
-        padding: '5px',
-        borderRadius: '5px',
-        border: '1px solid #ccc',
-        backgroundColor: '#222222',
-        color: 'white',
-    }
-
-    return <div style={containerStyle} onClick={() => onSelected(rule)} onMouseEnter={() => setHovered(true)} onMouseLeave={() => setHovered(false)}>
-        <RulesListItemButton square={true} onPressed={() => onToggled(rule.id)}>
-            {rule.enabled ? rule.order : 'x'}
-        </RulesListItemButton>
-        <div style={textContainerStyle}>
-            <div style={labelStyle}>
-                {rule.label}
-            </div>
-            <div style={regexStyle}>
-                {normalizeRegexSource(rule.rule_regex.source)} → {rule.rule_replacement}
-            </div>
+  return (
+    <div
+      style={containerStyle}
+      onClick={() => onSelected(rule)}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+    >
+      <RulesListItemButton square={true} onPressed={() => onToggled(rule.id)}>
+        {rule.enabled ? rule.order : "x"}
+      </RulesListItemButton>
+      <div style={textContainerStyle}>
+        <div style={labelStyle}>{rule.label}</div>
+        <div style={regexStyle}>
+          {normalizeRegexSource(rule.rule_regex.source)} →{" "}
+          {rule.rule_replacement}
         </div>
-        {EditChancePressed && (
-            <input
-                type="number"
-                min="0"
-                max="100"
-                value={rule.chance_to_apply * 100}
-                onChange={(e) => onSetChance(rule.id, parseFloat(e.target.value) / 100)}
-                style={EditChanceInputStyle}
-            />
-        )}
-        <RulesListItemButton square={false} onPressed={() => setEditChancePressed(!EditChancePressed)}>
-            {rule.chance_to_apply * 100}%
+      </div>
+      {EditChancePressed && (
+        <input
+          type="number"
+          min="0"
+          max="100"
+          value={rule.chance_to_apply * 100}
+          onChange={(e) =>
+            onSetChance(rule.id, parseFloat(e.target.value) / 100)
+          }
+          style={EditChanceInputStyle}
+        />
+      )}
+      <RulesListItemButton
+        square={false}
+        onPressed={() => setEditChancePressed(!EditChancePressed)}
+      >
+        {rule.chance_to_apply * 100}%
+      </RulesListItemButton>
+      <div>
+        <RulesListItemButton
+          square={true}
+          onPressed={() => onIncrement(rule.id)}
+        >
+          ↑
         </RulesListItemButton>
-        <div>
-            <RulesListItemButton square={true} onPressed={() => onIncrement(rule.id)}>↑</RulesListItemButton>
-            <RulesListItemButton square={true} onPressed={() => onDecrement(rule.id)}>↓</RulesListItemButton>
-            <RulesListItemButton square={true} onPressed={() => onDelete(rule.id)}>
-                x
-            </RulesListItemButton>
-        </div>
+        <RulesListItemButton
+          square={true}
+          onPressed={() => onDecrement(rule.id)}
+        >
+          ↓
+        </RulesListItemButton>
+        <RulesListItemButton square={true} onPressed={() => onDelete(rule.id)}>
+          x
+        </RulesListItemButton>
+      </div>
     </div>
+  );
 }
