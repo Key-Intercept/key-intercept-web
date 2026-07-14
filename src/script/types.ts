@@ -48,6 +48,11 @@ export type WhitelistItem = {
   discord_id: string;
 };
 
+// Utility function to check if a group is enabled (not expired)
+export function isGroupEnabled(group: RuleGroup): boolean {
+  return Date.now() < group.disabled_at.getTime();
+}
+
 export type DroneConfig = {
   config_id: bigint;
   drone_health: number;

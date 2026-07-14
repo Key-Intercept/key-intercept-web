@@ -14,9 +14,11 @@ export default function RulesListItemButton({ onPressed, onHovered, square, chil
         onHovered && onHovered(false, buttonStyle);
     };
 
-    const handleClick = () => {
+    const handleClick = (e: React.MouseEvent) => {
+        e.stopPropagation();
+        e.preventDefault();
         setPressed(true);
-        onPressed && onPressed();
+        onPressed && onPressed(e);
         setTimeout(() => setPressed(false), 200); // Reset pressed state after a short delay
     };
 
@@ -42,6 +44,10 @@ export default function RulesListItemButton({ onPressed, onHovered, square, chil
         onMouseLeave={handleMouseLeave}
         onClick={handleClick}
         style={buttonStyle}
+        onPointerDown={(e) => {
+            e.stopPropagation();
+            e.preventDefault();
+        }}
     >
         {children}
     </button>

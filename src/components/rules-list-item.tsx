@@ -3,10 +3,14 @@ import { useState } from "react";
 import RulesListItemButton from "./rules-list-item-button";
 import { canHaveDecorators } from "typescript";
 import { normalizeRegexSource } from "./ruleEditorModes/assets/regex";
+import { useSortable } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 
 export default function RulesListItem({
   rule,
   selected,
+  indented = false,
+  isGroupDisabled = false,
   onDelete,
   onToggled,
   onIncrement,
@@ -16,6 +20,8 @@ export default function RulesListItem({
 }: {
   rule: Rule;
   selected: boolean;
+  indented?: boolean;
+  isGroupDisabled?: boolean;
   onDelete: (id: bigint) => void;
   onToggled: (id: bigint) => void;
   onIncrement: (id: bigint) => void;
@@ -25,6 +31,25 @@ export default function RulesListItem({
 }) {
   const [hovered, setHovered] = useState(false);
   const [EditChancePressed, setEditChancePressed] = useState(false);
+
+  const {
+    setNodeRef,
+    isDragging,
+    attributes,
+    listeners,
+    transform,
+    transition,
+    isOver,
+  } = useSortable({
+    id: `rule-${rule.id}`,
+    data: { type: "Rule", rule },
+  });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  };
 
   const containerStyle: React.CSSProperties = {
     display: "flex",
@@ -40,8 +65,11 @@ export default function RulesListItem({
     maxWidth: "40vw",
     minWidth: "280px",
     backgroundColor: "#111111",
-    cursor: "pointer",
+    cursor: isDragging ? "grabbing" : "grab",
     flexWrap: "wrap",
+    marginLeft: indented ? "20px" : "0px",
+    opacity: isGroupDisabled ? 0.6 : 1,
+    transition: "all 0.2s ease",
   };
 
   const textContainerStyle: React.CSSProperties = {
@@ -64,6 +92,7 @@ export default function RulesListItem({
     textOverflow: "ellipsis",
     whiteSpace: "nowrap",
     width: "100%",
+    opacity: rule.enabled ? 1 : 0.6,
   };
 
   const regexStyle: React.CSSProperties = {
@@ -75,6 +104,7 @@ export default function RulesListItem({
     textOverflow: "ellipsis",
     whiteSpace: "nowrap",
     width: "100%",
+    opacity: rule.enabled ? 1 : 0.6,
   };
 
   const EditChanceInputStyle: React.CSSProperties = {
@@ -88,12 +118,21 @@ export default function RulesListItem({
 
   return (
     <div
-      style={containerStyle}
-      onClick={() => onSelected(rule)}
+      ref={setNodeRef}
+      style={{ ...style, ...containerStyle }}
+      onClick={(e) => {
+        e.stopPropagation();
+        onSelected(rule);
+      }}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
+      {...attributes}
     >
-      <RulesListItemButton square={true} onPressed={() => onToggled(rule.id)}>
+      <RulesListItemButton square={true} onPressed={(e: any) => {
+        e?.stopPropagation();
+        e?.preventDefault();
+        onToggled(rule.id);
+      }}>
         {rule.enabled ? rule.order : "x"}
       </RulesListItemButton>
       <div style={textContainerStyle}>
@@ -109,9 +148,15 @@ export default function RulesListItem({
           min="0"
           max="100"
           value={rule.chance_to_apply * 100}
-          onChange={(e) =>
-            onSetChance(rule.id, parseFloat(e.target.value) / 100)
-          }
+          onChange={(e) => {
+            e.stopPropagation();
+            onSetChance(rule.id, parseFloat(e.target.value) / 100);
+          }}
+          onPointerDown={(e) => {
+            e.stopPropagation();
+            e.preventDefault();
+          }}
+          onClick={(e) => e.stopPropagation()}
           style={EditChanceInputStyle}
         />
       )}

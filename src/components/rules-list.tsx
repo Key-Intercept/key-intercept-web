@@ -1,7 +1,18 @@
 import Card from "./card";
 import type { Rule, RuleGroup } from "../script/types";
 import RulesListItem from "./rules-list-item";
-import RulesListGroupItem from "./rules-list-group-item";
+import RulesListGroup from "./rules-list-group";
+import {
+  DndContext,
+  DragOverlay,
+  closestCorners,
+  type DragEndEvent,
+} from "@dnd-kit/core";
+import {
+  SortableContext,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
+import { useState } from "react";
 
 export default function RulesList({
   ruleGroups,
@@ -13,6 +24,7 @@ export default function RulesList({
   setSelectedRule,
   setSelectedRuleGroup,
   updateRule,
+  updateRuleGroup,
   deleteRule,
   deleteRuleGroup,
 }: {
@@ -29,6 +41,14 @@ export default function RulesList({
   deleteRule: (id: bigint) => void;
   deleteRuleGroup: (id: bigint) => void;
 }) {
+  const [draggedItem, setDraggedItem] = useState<any>(null);
+
+  // Create sortable IDs for all items
+  const sortableIds = [
+    ...looseRules.map((r) => `rule-${r.id}`),
+    ...ruleGroups.map((g) => `group-${g.id}`),
+  ];
+
   async function DeleteRule(rule_id: bigint, group_id: bigint | null) {
     if (group_id == null) {
       let output: Rule[] = [];
@@ -60,33 +80,32 @@ export default function RulesList({
   }
 
   async function DeleteRuleGroup(id: bigint, deleteRules: boolean) {
-    var output: RuleGroup[] = [];
-    for (var i of ruleGroups) {
-      if (i.id != id) {
-        output.push(i);
-      }
-    }
+    const groupToDelete = ruleGroups.find((g) => g.id === id);
+    if (!groupToDelete) return;
+
+    const newGroups = ruleGroups.filter((g) => g.id !== id);
+
     if (deleteRules) {
-      for (var i of ruleGroups) {
-        if (i.id == id) {
-          for (var j of i.rules) {
-            DeleteRule(j.id, i.id);
-          }
-        }
+      // Delete all rules in the group
+      for (const rule of groupToDelete.rules) {
+        await deleteRule(rule.id);
       }
     } else {
-      var newLooseRules = looseRules;
-      for (var i of ruleGroups) {
-        if (i.id == id) {
-          for (var j of i.rules) {
-            looseRules.push(j);
-          }
-        }
+      // Move rules to loose
+      const movedRules = groupToDelete.rules.map((rule) => ({
+        ...rule,
+        group_id: null,
+      }));
+
+      for (const rule of movedRules) {
+        await updateRule(rule);
       }
-      setLooseRules(newLooseRules);
+
+      setLooseRules([...looseRules, ...movedRules]);
     }
+
     await deleteRuleGroup(id);
-    setRuleGroups(output);
+    setRuleGroups(newGroups);
   }
 
   async function IncrementPriority(id: bigint) {
@@ -108,7 +127,7 @@ export default function RulesList({
   }
 
   async function DecrementPriority(id: bigint) {
-    let output = [...looseRules]; // CREATE A COPY
+    let output = [...looseRules];
 
     for (let i = 0; i < output.length; i++) {
       if (output[i].id == id) {
@@ -137,7 +156,7 @@ export default function RulesList({
   }
 
   async function setChance(id: bigint, chance: number) {
-    let output = [...looseRules]; // CREATE A COPY
+    let output = [...looseRules];
 
     for (let i = 0; i < output.length; i++) {
       if (output[i].id == id) {
@@ -164,12 +183,10 @@ export default function RulesList({
   }
 
   function selectRuleGroup(group: RuleGroup) {
-    if (selectedRuleGroup?.id === group.id) {
-      setSelectedRuleGroup(null);
-      setSelectedRule(null);
-      return;
-    }
+    // Always set to this group (don't toggle off)
     setSelectedRuleGroup(group);
+    
+    // Only keep selected rule if it's in this group
     let inRule = false;
     for (var i of group.rules) {
       if (i.id === selectedRule?.id) {
@@ -181,43 +198,203 @@ export default function RulesList({
     }
   }
 
+  function handleDragEnd(event: DragEndEvent) {
+    const { active, over } = event;
+    setDraggedItem(null);
+
+    if (!over) return;
+
+    const activeId = active.id as string;
+    const overId = over.id as string;
+
+    // Handle reordering loose rules
+    if (
+      activeId.startsWith("rule-") &&
+      overId.startsWith("rule-") &&
+      active.data.current?.type === "Rule" &&
+      over.data.current?.type === "Rule"
+    ) {
+      const activeRule = active.data.current.rule as Rule;
+      const overRule = over.data.current.rule as Rule;
+
+      if (activeRule.group_id === null && overRule.group_id === null) {
+        const activeIndex = looseRules.findIndex((r) => r.id === activeRule.id);
+        const overIndex = looseRules.findIndex((r) => r.id === overRule.id);
+
+        if (activeIndex !== overIndex) {
+          const newRules = [...looseRules];
+          const [removed] = newRules.splice(activeIndex, 1);
+          newRules.splice(overIndex, 0, removed);
+
+          // Recalculate order values
+          newRules.forEach((rule, index) => {
+            rule.order = index * 10;
+            updateRule(rule);
+          });
+
+          setLooseRules(newRules);
+        }
+      }
+    }
+
+    // Handle moving rule into group
+    if (
+      activeId.startsWith("rule-") &&
+      overId.startsWith("drop-group-") &&
+      active.data.current?.type === "Rule"
+    ) {
+      const rule = active.data.current.rule as Rule;
+      const targetGroupId = over.data.current?.group?.id as bigint | undefined;
+
+      if (targetGroupId !== undefined && rule.group_id !== targetGroupId) {
+        // Look up current group from state instead of using stale event data
+        const currentTargetGroup = ruleGroups.find((g) => g.id === targetGroupId);
+        if (!currentTargetGroup) return;
+
+        // Create updated rule with new group_id
+        const updatedRule = { ...rule, group_id: targetGroupId };
+
+        // Find and remove from current location, then add to target group
+        let newGroups = ruleGroups.map((g) => {
+          // Remove from other groups if it was in one
+          if (rule.group_id !== null && g.id === rule.group_id) {
+            return { ...g, rules: g.rules.filter((r) => r.id !== rule.id) };
+          }
+          return g;
+        });
+
+        // Add to target group
+        newGroups = newGroups.map((g) => {
+          if (g.id === targetGroupId) {
+            return {
+              ...g,
+              rules: [...g.rules.filter((r) => r.id !== rule.id), updatedRule],
+            };
+          }
+          return g;
+        });
+
+        // Atomic state update
+        setRuleGroups(newGroups);
+        if (rule.group_id === null) {
+          setLooseRules(looseRules.filter((r) => r.id !== rule.id));
+        }
+
+        // Update the rule in the database
+        updateRule(updatedRule);
+      }
+    }
+  }
+
   return (
     <Card title="Rules">
       {looseRules?.length === 0 && ruleGroups?.length === 0 ? (
         <p>No rules found for this configuration.</p>
       ) : (
-        <ul>
-          {looseRules ? (
-            looseRules.map((rule) => (
-              <RulesListItem
-                key={rule.id}
-                selected={selectedRule?.id === rule.id}
-                onSelected={selectRule}
-                rule={rule}
-                onDelete={(rule) => DeleteRule(rule, null)}
-                onIncrement={IncrementPriority}
-                onDecrement={DecrementPriority}
-                onToggled={toggleEnabled}
-                onSetChance={setChance}
-              />
-            ))
-          ) : (
-            <></>
-          )}
-          {ruleGroups ? (
-            ruleGroups.map((group) => (
-              <RulesListGroupItem
-                key={group.id}
-                selected={selectedRuleGroup?.id === group.id}
-                onSelected={selectRuleGroup}
-                group={group}
-                onDelete={DeleteRuleGroup}
-              />
-            ))
-          ) : (
-            <></>
-          )}
-        </ul>
+        <DndContext
+          onDragEnd={handleDragEnd}
+          collisionDetection={closestCorners}
+          onDragStart={(event) => {
+            setDraggedItem(event.active.data.current);
+          }}
+        >
+          <SortableContext
+            items={sortableIds}
+            strategy={verticalListSortingStrategy}
+          >
+            <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
+              {/* Loose Rules Section */}
+              {looseRules && looseRules.length > 0 && (
+                <li style={{ marginBottom: "20px" }}>
+                  <div
+                    style={{
+                      fontSize: "0.9rem",
+                      fontWeight: "bold",
+                      color: "#7700ff",
+                      marginBottom: "10px",
+                      textTransform: "uppercase",
+                      letterSpacing: "1px",
+                    }}
+                  >
+                    Ungrouped Rules
+                  </div>
+                  <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
+                    {looseRules.map((rule) => (
+                      <li key={rule.id}>
+                        <RulesListItem
+                          selected={selectedRule?.id === rule.id}
+                          onSelected={selectRule}
+                          rule={rule}
+                          onDelete={(rule) => DeleteRule(rule, null)}
+                          onIncrement={IncrementPriority}
+                          onDecrement={DecrementPriority}
+                          onToggled={toggleEnabled}
+                          onSetChance={setChance}
+                        />
+                      </li>
+                    ))}
+                  </ul>
+                </li>
+              )}
+
+              {/* Rule Groups Section */}
+              {ruleGroups && ruleGroups.length > 0 && (
+                <li>
+                  <div
+                    style={{
+                      fontSize: "0.9rem",
+                      fontWeight: "bold",
+                      color: "#7700ff",
+                      marginBottom: "10px",
+                      marginTop: "20px",
+                      textTransform: "uppercase",
+                      letterSpacing: "1px",
+                    }}
+                  >
+                    Rule Groups
+                  </div>
+                  <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
+                    {ruleGroups.map((group) => (
+                      <li key={group.id}>
+                        <RulesListGroup
+                          group={group}
+                          selectedRule={selectedRule}
+                          selectedGroup={selectedRuleGroup}
+                          onSelectGroup={selectRuleGroup}
+                          onSelectRule={selectRule}
+                          onDeleteRule={(ruleId) =>
+                            DeleteRule(ruleId, group.id)
+                          }
+                          onDeleteGroup={DeleteRuleGroup}
+                          onIncrementRulePriority={IncrementPriority}
+                          onDecrementRulePriority={DecrementPriority}
+                          onToggleRuleEnabled={toggleEnabled}
+                          onSetRuleChance={setChance}
+                        />
+                      </li>
+                    ))}
+                  </ul>
+                </li>
+              )}
+            </ul>
+          </SortableContext>
+          <DragOverlay>
+            {draggedItem?.type === "Rule" && (
+              <div
+                style={{
+                  backgroundColor: "#1a0033",
+                  padding: "10px",
+                  borderRadius: "8px",
+                  border: "2px solid #7700ff",
+                  minWidth: "200px",
+                  opacity: 0.8,
+                }}
+              >
+                Rule being dragged
+              </div>
+            )}
+          </DragOverlay>
+        </DndContext>
       )}
     </Card>
   );

@@ -43,15 +43,36 @@ const initialRules = rulesData ? rulesData.map((rule) => ({
     config_id: rule.config_id,
     rule_regex: new RegExp(rule.rule_regex),
     rule_replacement: rule.rule_replacement,
+    regex_normalize: rule.regex_normalize,
     enabled: rule.enabled,
     chance_to_apply: rule.chance_to_apply,
     label: rule.label,
     order: rule.order,
+    group_id: rule.group_id,
 })) : [];
 
 const initialRulesEnd = configData?.rules_end ? new Date(configData.rules_end).toISOString() : new Date().toISOString();
+
+const { data: groupsData, error: groupsError } = await supabase
+  .from("Rules_Groups")
+  .select("*")
+  .eq("config_id", configID);
+
+if (groupsError) {
+  console.error("[supabase] Error fetching rule groups:", groupsError);
+}
+
+const initialGroups = groupsData ? groupsData.map((group) => ({
+  id: group.id,
+  config_id: group.config_id,
+  disabled_at: new Date(group.disabled_at),
+  created_at: new Date(group.created_at),
+  name: group.name,
+  rules: [],
+})) : [];
+
 ---
 
 <Layout title={title}>
-    <RulesPageContainer initialRules={initialRules} initialConfigId={configID.toString()} initialRulesEnd={initialRulesEnd} client:load />
+  <RulesPageContainer initialRules={initialRules} initialConfigId={configID.toString()} initialRulesEnd={initialRulesEnd} initialGroups={initialGroups} client:load />
 </Layout>
