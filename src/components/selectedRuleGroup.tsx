@@ -31,7 +31,7 @@ export default function SelectedRuleGroup({
       disabled_at: new Date(Date.now()),
       name: "New Rule Group",
       rules: [],
-    },
+    } as RuleGroup;
   }
   const isNewGroup = !_selectedGroup || _selectedGroup.id === -1n;
 
@@ -42,9 +42,9 @@ export default function SelectedRuleGroup({
         : ({
             id: -1n,
             config_id: defaultConfigId,
-      created_at: new Date(Date.now()),
-      disabled_at: new Date(Date.now()),
-      name: label,
+            created_at: new Date(Date.now()),
+            disabled_at: new Date(Date.now()),
+            name: label,
           } as RuleGroup),
     );
   }
@@ -56,9 +56,9 @@ export default function SelectedRuleGroup({
         : ({
             id: -1n,
             config_id: defaultConfigId,
-      created_at: new Date(Date.now()),
-      disabled_at: new Date(disabled_at),
-      name: "New Rule Group",
+            created_at: new Date(Date.now()),
+            disabled_at: new Date(disabled_at),
+            name: "New Rule Group",
           } as RuleGroup),
     );
   }
@@ -98,22 +98,32 @@ export default function SelectedRuleGroup({
     width: "100%",
   };
 
-  const runsOutIn = Date.now() - (selectedGroup?.disabled_at.getTime() ?? Date.now())
+  const runsOutIn =
+    Date.now() - (selectedGroup?.disabled_at.getTime() ?? Date.now());
 
   return (
     <Card title={isNewGroup ? "Add New Rule Group" : "Selected Rule Group"}>
       <div style={editorContainerStyle}>
-      <Textbox placeholder="Group name" defaultValue={selectedGroup?.name ?? ""} onChange={setNameProp} />
-      <Datebox placeholder="Runs Out in:" defaultValue={runsOutIn} onChange={(hour, min, sec) => {
-	if (hour !== null) {
-		setDisabledAtProp(Date.now() + (hour * 60 * 60 * 1000));
-	}
-	if (min !== null) {
-		setDisabledAtProp(Date.now() + (min * 60 * 1000));
-	}
-	if (sec !== null) {
-		setDisabledAtProp(Date.now() + (sec * 1000));
-      }}}/>
+        <Textbox
+          placeholder="Group name"
+          defaultValue={selectedGroup?.name ?? ""}
+          onChange={setNameProp}
+        />
+        <Datebox
+          placeholder="Runs Out in:"
+          defaultValue={runsOutIn}
+          onChange={(hour, min, sec) => {
+            if (hour !== null) {
+              setDisabledAtProp(Date.now() + hour * 60 * 60 * 1000);
+            }
+            if (min !== null) {
+              setDisabledAtProp(Date.now() + min * 60 * 1000);
+            }
+            if (sec !== null) {
+              setDisabledAtProp(Date.now() + sec * 1000);
+            }
+          }}
+        />
         <Separator color="#333" />
         <button
           style={submitButtonStyle}

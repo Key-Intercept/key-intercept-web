@@ -38,6 +38,7 @@ export type Rule = {
   chance_to_apply: number;
   label: string;
   order: number;
+  group_id: bigint | null;
 };
 
 export type WhitelistItem = {

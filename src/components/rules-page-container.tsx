@@ -1,13 +1,32 @@
 import { useState } from "react";
-import type { Rule } from "../script/types";
+import type { Rule, RuleGroup } from "../script/types";
 import RulesList from "./rules-list";
 import SelectedRule from "./selectedRule";
 import TurnOnTimer from "./turn-on-timer";
+import SelectedRuleGroup from "./selectedRuleGroup";
 
-export default function RulesPageContainer({ initialRules, initialConfigId, initialRulesEnd }: { initialRules: Rule[]; initialConfigId: string; initialRulesEnd: string }) {
-	const [rules, setRules] = useState([...initialRules].sort((a, b) => a.order - b.order));
-	const [selectedRule, setSelectedRule] = useState<Rule | null>(null);
-	const currentConfigId = BigInt(initialConfigId);
+export default function RulesPageContainer({
+  initialRules,
+  initialGroups,
+  initialConfigId,
+  initialRulesEnd,
+}: {
+  initialRules: Rule[];
+  initialGroups: RuleGroup[];
+  initialConfigId: string;
+  initialRulesEnd: string;
+}) {
+  const [looseRules, setLooseRules] = useState(
+    [...initialRules].filter((r, i, a) => r.group_id === null).sort((a, b) => a.order - b.order),
+  );
+    const [groups, setGroups] = useState(() => {
+	    var temp = [...initialGroups];
+	temp.forEach((v, k, c) => v.rules = [...initialRules].filter((r, j, b) => r.group_id === v.id));
+	return temp;
+    });
+  const [selectedRule, setSelectedRule] = useState<Rule | null>(null);
+  const [selectedGroup, setSelectedGroup] = useState<RuleGroup | null>(null);
+  const currentConfigId = BigInt(initialConfigId);
 
   async function deleteRuleDatabase(id: bigint) {
     const res = await fetch(`/api/rules?id=${id}`, {
@@ -20,6 +39,17 @@ export default function RulesPageContainer({ initialRules, initialConfigId, init
         "An error occurred while deleting the rule. Please try again.",
       );
     }
+  }
+
+  async function deleteGroupDatabase(id: bigint) {
+	const res = await fetch (`/apu/ruleGroups?id=${id}`. {method: "DELETE",});
+
+	if (!res.ok) {
+		console.error("Error deleting rule group:", await res.text());
+		await alert(
+			"An error has occured while deleting the group. Please try again.".
+		);
+	}
   }
 
   async function updateRuleDatabase(rule: Rule) {
@@ -44,10 +74,51 @@ export default function RulesPageContainer({ initialRules, initialConfigId, init
         "An error occurred while updating the rule. Please try again.",
       );
     }
-    setRules((prevRules) => {
+	if (rule.group_id === null) {
+    setLooseRules((prevRules) => {
       const updatedRules = prevRules.map((r) => (r.id === rule.id ? rule : r));
       return updatedRules.sort((a, b) => a.order - b.order);
     });
+	}
+	else {
+	var output: RuleGroup[] = [...groups];
+	for (let i = 0; i < output.length; i++) {
+		output.push(output[i]);
+		if (output[i].id === rule.group_id) {
+			for (let j = 0; j < output[i].rules.length; j++) {
+				if (output[i].rules[j].id === rule.id) {
+					output[i].rules[j] = rule;	
+				}
+			}
+		}
+	}
+	setGroups(output);
+	}
+  }
+
+  async function updateGroupDatabase(group: RuleGroup) {
+	const payload = {
+	...group,
+	id: group.id.toString(),
+	config_id: group.config_id.toString(),
+	};
+
+	const res = await fetch("/api/ruleGroups", {
+		method: "PUT",
+		headers: { "Content-Type": "application/json" },
+		body: JSON.stringify(payload)
+	});
+
+	if (!res.ok) {
+		console.error("Error updating group:", await res.text());
+		await alert("An error occured while updating the group. Please try again.",
+			   );
+	}
+	setGroups((prevGroups) => {
+		const updatedGroups = prevGroups.map((g) => (g.id === group.id ? group : g));
+		return updatedGroups;
+	});
+
   }
 
   async function addNewRuleDatabase(rule: Rule) {
@@ -71,33 +142,93 @@ export default function RulesPageContainer({ initialRules, initialConfigId, init
       console.error("Error adding new rule:", await res.text());
       await alert("An error occurred while adding the rule. Please try again.");
     }
-
-    setRules((prevRules) => {
+	if (rule.group_id === null) {
+    setLooseRules((prevRules) => {
       const newRule = { ...rule, id: BigInt(-1) }; // Temporary ID until we get the real one from the server
       return [...prevRules, newRule].sort((a, b) => a.order - b.order);
     });
+	}
+	else {
+	var output: RuleGroup[] = [...groups];
+	for (let i = 0; i < output.length; i++) {
+		output.push(output[i]);
+		if (output[i].id === rule.group_id) {
+			output[i].rules.push({ ...rule, id: BigInt(-1) });
+		}
+	}
+	setGroups(output);
+	}
   }
 
-	return (
-		<>
-		<TurnOnTimer title={"Rules End After"} configId={currentConfigId} endField={"rules_end"} initialEnd={initialRulesEnd} />
-			<SelectedRule i_selectedRule={selectedRule || null} defaultConfigId={currentConfigId} setRule={(rule) => {
-				setSelectedRule(rule)
-				if (rule!.id === -1n) {
-					addNewRuleDatabase(rule!);
-				}
-				else {
-					updateRuleDatabase(rule!);
-				}
-			}} />
-			<RulesList
-				rules={rules}
-				setRules={setRules}
-				selectedRule={selectedRule}
-				setSelectedRule={setSelectedRule}
-				updateRule={updateRuleDatabase}
-				deleteRule={deleteRuleDatabase}
-			/>
-		</>
-	);
+  async function addNewGroupDatabase(group: RuleGroup) {
+	  const {id: _id, config_id: _configId, ...groupData } = group;
+	const payload = {
+	...group,
+	config_id: group.config_id.toString(),
+	};
+
+	const res = await fetch("/api/ruleGroups", {
+		method: "POST",
+		headers: { "Content-Type": "application/json" },
+		body: JSON.stringify(payload)
+	});
+
+	if (!res.ok) {
+		console.error("Error adding new group:", await res.text());
+		await alert("An error occured while adding the group. Please try again.",
+			   );
+	}
+	setGroups((prevGroups) => {
+		const newGroup = { ...group, id: BigInt(-1) };
+		return [...prevGroups, newGroup];
+	});
+  }
+  return (
+    <>
+      <TurnOnTimer
+        title={"Rules End After"}
+        configId={currentConfigId}
+        endField={"rules_end"}
+        initialEnd={initialRulesEnd}
+      />
+      <SelectedRule
+        i_selectedRule={selectedRule || null}
+        defaultConfigId={currentConfigId}
+        setRule={(rule) => {
+          setSelectedRule(rule);
+          if (rule!.id === -1n) {
+            addNewRuleDatabase(rule!);
+          } else {
+            updateRuleDatabase(rule!);
+          }
+        }}
+      />
+      <SelectedRuleGroup 
+	selectedGroup={selectedGroup}
+	defaultConfigId={currentConfigId}
+	setGroup={(group) => {
+		setSelectedGroup(group);
+		if (group!.id === -1n) {
+			addNewGroupDatabase(group!);
+		} else {
+			updateGroupDatabase(group!);
+		}
+	}}
+      />
+      <RulesList
+        looseRules={looseRules}
+        setLooseRules={setLooseRules}
+	ruleGroups={groups}
+	setRuleGroups={setGroups}
+        selectedRule={selectedRule}
+	selectedRuleGroup={selectedGroup}
+	setSelectedRuleGroup={setSelectedGroup}
+        setSelectedRule={setSelectedRule}
+        updateRule={updateRuleDatabase}
+	updateRuleGroup={updateGroupDatabase}
+        deleteRule={deleteRuleDatabase}
+	deleteRuleGroup={deleteGroupDatabase}
+      />
+    </>
+  );
 }
