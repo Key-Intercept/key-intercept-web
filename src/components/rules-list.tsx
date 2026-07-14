@@ -8,6 +8,7 @@ import {
   closestCorners,
   type DragEndEvent,
 } from "@dnd-kit/core";
+import { useDroppable } from "@dnd-kit/core";
 import {
   SortableContext,
   verticalListSortingStrategy,
@@ -48,6 +49,11 @@ export default function RulesList({
     ...looseRules.map((r) => `rule-${r.id}`),
     ...ruleGroups.map((g) => `group-${g.id}`),
   ];
+
+  const { setNodeRef: setLooseDropRef } = useDroppable({
+    id: `drop-loose`,
+    data: { type: "LooseDropZone" },
+  });
 
   async function DeleteRule(rule_id: bigint, group_id: bigint | null) {
     if (group_id == null) {
@@ -109,50 +115,115 @@ export default function RulesList({
   }
 
   async function IncrementPriority(id: bigint) {
-    let output = [...looseRules];
+    // Try to find and update in loose rules
+    let looseIndex = looseRules.findIndex((r) => r.id === id);
+    if (looseIndex !== -1) {
+      let output = [...looseRules];
+      output[looseIndex].order = output[looseIndex - 1]
+        ? output[looseIndex - 1].order - 1
+        : output[looseIndex].order - 1;
+      output.sort((a, b) => a.order - b.order);
+      await updateRule(output[looseIndex]);
+      setLooseRules(output);
+      return;
+    }
 
-    for (let i = 0; i < output.length; i++) {
-      if (output[i].id == id) {
-        output[i].order = output[i - 1]
-          ? output[i - 1].order - 1
-          : output[i].order - 1;
+    // Try to find and update in groups
+    for (const group of ruleGroups) {
+      const ruleIndex = group.rules.findIndex((r) => r.id === id);
+      if (ruleIndex !== -1) {
+        const newGroups = ruleGroups.map((g) => {
+          if (g.id === group.id) {
+            let newRules = [...g.rules];
+            newRules[ruleIndex].order = newRules[ruleIndex - 1]
+              ? newRules[ruleIndex - 1].order - 1
+              : newRules[ruleIndex].order - 1;
+            newRules.sort((a, b) => a.order - b.order);
+            return { ...g, rules: newRules };
+          }
+          return g;
+        });
+        const updatedRule = newGroups.find((g) => g.id === group.id)?.rules.find((r) => r.id === id);
+        if (updatedRule) {
+          await updateRule(updatedRule);
+        }
+        setRuleGroups(newGroups);
+        return;
       }
     }
-    output.sort((a, b) => {
-      return a.order - b.order;
-    });
-
-    await updateRule(output.find((a) => a.id == id)!);
-    setLooseRules(output);
   }
 
   async function DecrementPriority(id: bigint) {
-    let output = [...looseRules];
+    // Try to find and update in loose rules
+    let looseIndex = looseRules.findIndex((r) => r.id === id);
+    if (looseIndex !== -1) {
+      let output = [...looseRules];
+      output[looseIndex].order = output[looseIndex + 1]
+        ? output[looseIndex + 1].order + 1
+        : output[looseIndex].order + 1;
+      output.sort((a, b) => a.order - b.order);
+      await updateRule(output[looseIndex]);
+      setLooseRules(output);
+      return;
+    }
 
-    for (let i = 0; i < output.length; i++) {
-      if (output[i].id == id) {
-        output[i].order = output[i + 1]
-          ? output[i + 1].order + 1
-          : output[i].order + 1;
+    // Try to find and update in groups
+    for (const group of ruleGroups) {
+      const ruleIndex = group.rules.findIndex((r) => r.id === id);
+      if (ruleIndex !== -1) {
+        const newGroups = ruleGroups.map((g) => {
+          if (g.id === group.id) {
+            let newRules = [...g.rules];
+            newRules[ruleIndex].order = newRules[ruleIndex + 1]
+              ? newRules[ruleIndex + 1].order + 1
+              : newRules[ruleIndex].order + 1;
+            newRules.sort((a, b) => a.order - b.order);
+            return { ...g, rules: newRules };
+          }
+          return g;
+        });
+        const updatedRule = newGroups.find((g) => g.id === group.id)?.rules.find((r) => r.id === id);
+        if (updatedRule) {
+          await updateRule(updatedRule);
+        }
+        setRuleGroups(newGroups);
+        return;
       }
     }
-    output.sort((a, b) => {
-      return a.order - b.order;
-    });
-    await updateRule(output.find((a) => a.id == id)!);
-    setLooseRules(output);
   }
 
   async function toggleEnabled(id: bigint) {
-    let output = [...looseRules];
-
-    for (let i = 0; i < output.length; i++) {
-      if (output[i].id == id) {
-        output[i].enabled = !output[i].enabled;
+    // Try to find and update in loose rules
+    let found = false;
+    const newLoose = looseRules.map((r) => {
+      if (r.id === id) {
+        found = true;
+        const updated = { ...r, enabled: !r.enabled };
+        updateRule(updated);
+        return updated;
       }
+      return r;
+    });
+
+    if (found) {
+      setLooseRules(newLoose);
+      return;
     }
-    await updateRule(output.find((a) => a.id == id)!);
-    setLooseRules(output);
+
+    // Try to find and update in groups
+    const newGroups = ruleGroups.map((g) => {
+      const updatedRules = g.rules.map((r) => {
+        if (r.id === id) {
+          const updated = { ...r, enabled: !r.enabled };
+          updateRule(updated);
+          return updated;
+        }
+        return r;
+      });
+      return { ...g, rules: updatedRules };
+    });
+
+    setRuleGroups(newGroups);
   }
 
   async function setChance(id: bigint, chance: number) {
@@ -170,16 +241,18 @@ export default function RulesList({
   function selectRule(rule: Rule) {
     if (selectedRule?.id === rule.id) {
       setSelectedRule(null);
+      setSelectedRuleGroup(null);
       return;
     }
     setSelectedRule(rule);
-    for (var i of ruleGroups) {
-      for (var j of i.rules) {
-        if (j.id === rule.id) {
-          selectRuleGroup(i);
-        }
+    // Find and set the containing group directly using the passed rule id
+    for (const g of ruleGroups) {
+      if (g.rules.some((r) => r.id === rule.id)) {
+        setSelectedRuleGroup(g);
+        return;
       }
     }
+    setSelectedRuleGroup(null);
   }
 
   function selectRuleGroup(group: RuleGroup) {
@@ -284,6 +357,35 @@ export default function RulesList({
         updateRule(updatedRule);
       }
     }
+
+    // Additional: handle moving a rule out of a group when dropped on a loose rule or loose area
+    if (activeId.startsWith("rule-") && active.data.current?.type === "Rule") {
+      const activeRule = active.data.current.rule as Rule;
+
+      // dropped onto loose area
+      if (over.data.current?.type === "LooseDropZone") {
+        if (activeRule.group_id !== null) {
+          const newGroups = ruleGroups.map((g) => ({ ...g, rules: g.rules.filter((r) => r.id !== activeRule.id) }));
+          setRuleGroups(newGroups);
+          setLooseRules([...looseRules, { ...activeRule, group_id: null }]);
+          updateRule({ ...activeRule, group_id: null });
+        }
+      }
+
+      // dropped onto a loose rule (insert at position)
+      if (over.data.current?.type === "Rule") {
+        const overRule = over.data.current.rule as Rule;
+        if (activeRule.group_id !== null && overRule.group_id === null) {
+          const newGroups = ruleGroups.map((g) => ({ ...g, rules: g.rules.filter((r) => r.id !== activeRule.id) }));
+          const newLoose = [...looseRules];
+          const overIndex = newLoose.findIndex((r) => r.id === overRule.id);
+          newLoose.splice(overIndex, 0, { ...activeRule, group_id: null });
+          setRuleGroups(newGroups);
+          setLooseRules(newLoose);
+          updateRule({ ...activeRule, group_id: null });
+        }
+      }
+    }
   }
 
   return (
@@ -318,7 +420,7 @@ export default function RulesList({
                   >
                     Ungrouped Rules
                   </div>
-                  <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
+                  <ul ref={setLooseDropRef} style={{ listStyle: "none", padding: 0, margin: 0 }}>
                     {looseRules.map((rule) => (
                       <li key={rule.id}>
                         <RulesListItem

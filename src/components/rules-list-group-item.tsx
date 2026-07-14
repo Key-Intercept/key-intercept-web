@@ -13,6 +13,8 @@ export default function RulesListGroupItem({
   onToggleExpand,
   onDelete,
   onSelected,
+  dragAttributes,
+  dragListeners,
 }: {
   group: RuleGroup;
   selected: boolean;
@@ -21,6 +23,8 @@ export default function RulesListGroupItem({
   onToggleExpand: () => void;
   onDelete: (id: bigint, deleteRules: boolean) => void;
   onSelected: (group: RuleGroup) => void;
+  dragAttributes: any;
+  dragListeners: any;
 }) {
   const [hovered, setHovered] = useState(false);
   const [hoverDelete, setHoverDelete] = useState(false);
@@ -79,6 +83,20 @@ export default function RulesListGroupItem({
     userSelect: "none",
   };
 
+  const dragHandleStyle: React.CSSProperties = {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    width: "22px",
+    height: "22px",
+    borderRadius: "4px",
+    backgroundColor: "#2a2a2a",
+    color: "#999",
+    cursor: "grab",
+    userSelect: "none",
+    flexShrink: 0,
+  };
+
   const labelStyle: React.CSSProperties = {
     fontWeight: "bold",
     fontSize: "clamp(0.9rem, 2vw, 1rem)",
@@ -134,6 +152,14 @@ export default function RulesListGroupItem({
         }}
       >
         ▶
+      </div>
+      <div
+        {...dragListeners}
+        style={dragHandleStyle}
+        onClick={(e) => e.stopPropagation()}
+        aria-label="Drag group"
+      >
+        ⋮⋮
       </div>
       <div style={textContainerStyle}>
         <div style={labelStyle}>{group.name}</div>

@@ -82,23 +82,44 @@ export default function RulesPageContainer({
     }
     if (rule.group_id === null) {
       setLooseRules((prevRules) => {
-        const updatedRules = prevRules.map((r) =>
-          r.id === rule.id ? rule : r,
-        );
-        return updatedRules.sort((a, b) => a.order - b.order);
+        // Remove rule from any group it was in and add/replace in loose
+        const exists = prevRules.some((r) => r.id === rule.id);
+        const next = exists
+          ? prevRules.map((r) => (r.id === rule.id ? rule : r))
+          : [...prevRules, rule];
+        return next.sort((a, b) => a.order - b.order);
       });
+      // Also remove from any group it might be in
+      setGroups((prevGroups) =>
+        prevGroups.map((g) => ({
+          ...g,
+          rules: g.rules.filter((r) => r.id !== rule.id),
+        }))
+      );
     } else {
-      var output: RuleGroup[] = [...groups];
-      for (let i = 0; i < output.length; i++) {
-        if (output[i].id === rule.group_id) {
-          for (let j = 0; j < output[i].rules.length; j++) {
-            if (output[i].rules[j].id === rule.id) {
-              output[i].rules[j] = rule;
-            }
-          }
+      // Rule has a group_id, so add/replace into the target group and remove from loose
+      setGroups((prevGroups) => {
+        // First, remove the rule from any group
+        const cleaned = prevGroups.map((g) => ({
+          ...g,
+          rules: g.rules.filter((r) => r.id !== rule.id),
+        }));
+        // Then add/replace into the target group
+        const targetIndex = cleaned.findIndex((g) => g.id === rule.group_id);
+        if (targetIndex !== -1) {
+          const g = cleaned[targetIndex];
+          const exists = g.rules.some((r) => r.id === rule.id);
+          const newRules = exists
+            ? g.rules.map((r) => (r.id === rule.id ? rule : r))
+            : [...g.rules, rule];
+          cleaned[targetIndex] = { ...g, rules: newRules };
         }
-      }
-      setGroups(output);
+        return cleaned;
+      });
+      // Remove from loose rules if it was there
+      setLooseRules((prevRules) =>
+        prevRules.filter((r) => r.id !== rule.id)
+      );
     }
   }
 
@@ -194,12 +215,12 @@ export default function RulesPageContainer({
   }
   return (
     <>
-      <TurnOnTimer
+      {/* <TurnOnTimer
         title={"Rules End After"}
         configId={currentConfigId}
         endField={"rules_end"}
         initialEnd={initialRulesEnd}
-      />
+      /> */}
       <SelectedRule
         i_selectedRule={selectedRule || null}
         defaultConfigId={currentConfigId}

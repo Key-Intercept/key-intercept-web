@@ -1,7 +1,6 @@
 import type { Rule } from "../script/types";
 import { useState } from "react";
 import RulesListItemButton from "./rules-list-item-button";
-import { canHaveDecorators } from "typescript";
 import { normalizeRegexSource } from "./ruleEditorModes/assets/regex";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
@@ -32,6 +31,9 @@ export default function RulesListItem({
   const [hovered, setHovered] = useState(false);
   const [EditChancePressed, setEditChancePressed] = useState(false);
 
+  // Rule is effectively enabled only if both the rule is enabled AND the group is not disabled
+  const effectivelyEnabled = rule.enabled && !isGroupDisabled;
+
   const {
     setNodeRef,
     isDragging,
@@ -39,7 +41,6 @@ export default function RulesListItem({
     listeners,
     transform,
     transition,
-    isOver,
   } = useSortable({
     id: `rule-${rule.id}`,
     data: { type: "Rule", rule },
@@ -87,24 +88,24 @@ export default function RulesListItem({
   const labelStyle: React.CSSProperties = {
     fontWeight: "bold",
     fontSize: "clamp(0.9rem, 2vw, 1rem)",
-    textDecoration: rule.enabled ? "none" : "line-through",
+    textDecoration: effectivelyEnabled ? "none" : "line-through",
     overflow: "hidden",
     textOverflow: "ellipsis",
     whiteSpace: "nowrap",
     width: "100%",
-    opacity: rule.enabled ? 1 : 0.6,
+    opacity: effectivelyEnabled ? 1 : 0.6,
   };
 
   const regexStyle: React.CSSProperties = {
     fontStyle: "italic",
     color: "#555",
-    textDecoration: rule.enabled ? "none" : "line-through",
+    textDecoration: effectivelyEnabled ? "none" : "line-through",
     fontSize: "clamp(0.85rem, 1.5vw, 0.95rem)",
     overflow: "hidden",
     textOverflow: "ellipsis",
     whiteSpace: "nowrap",
     width: "100%",
-    opacity: rule.enabled ? 1 : 0.6,
+    opacity: effectivelyEnabled ? 1 : 0.6,
   };
 
   const EditChanceInputStyle: React.CSSProperties = {
@@ -114,6 +115,20 @@ export default function RulesListItem({
     border: "1px solid #ccc",
     backgroundColor: "#222222",
     color: "white",
+  };
+
+  const dragHandleStyle: React.CSSProperties = {
+    width: "22px",
+    height: "22px",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    borderRadius: "4px",
+    backgroundColor: "#2a2a2a",
+    color: "#999",
+    cursor: isDragging ? "grabbing" : "grab",
+    userSelect: "none",
+    flexShrink: 0,
   };
 
   return (
@@ -128,12 +143,20 @@ export default function RulesListItem({
       onMouseLeave={() => setHovered(false)}
       {...attributes}
     >
+      <div
+        {...listeners}
+        style={dragHandleStyle}
+        onClick={(e) => e.stopPropagation()}
+        aria-label="Drag rule"
+      >
+        ⋮⋮
+      </div>
       <RulesListItemButton square={true} onPressed={(e: any) => {
         e?.stopPropagation();
         e?.preventDefault();
         onToggled(rule.id);
       }}>
-        {rule.enabled ? rule.order : "x"}
+        {effectivelyEnabled ? rule.order : "x"}
       </RulesListItemButton>
       <div style={textContainerStyle}>
         <div style={labelStyle}>{rule.label}</div>

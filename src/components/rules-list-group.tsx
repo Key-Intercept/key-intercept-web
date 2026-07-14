@@ -86,6 +86,8 @@ export default function RulesListGroup({
         onDelete={onDeleteGroup}
         onSelected={onSelectGroup}
         isEnabled={isEnabled}
+        dragAttributes={attributes}
+        dragListeners={listeners}
       />
       <div style={rulesContainerStyle}>
         {group.rules?.map((rule) => (
