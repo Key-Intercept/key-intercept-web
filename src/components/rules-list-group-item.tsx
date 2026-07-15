@@ -129,8 +129,8 @@ export default function RulesListGroupItem({
   };
 
   const remainingTime = formatRemainingTime(
-    Date.now() - group.disabled_at.getTime(),
-  );
+    group.disabled_at.getTime() - Date.now(),
+  ).split(":");
 
   return (
     <div
