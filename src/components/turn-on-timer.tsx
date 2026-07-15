@@ -5,7 +5,7 @@ import "../style/turn-on-timer.css";
 
 const MAX_END_AT = new Date("9999-12-31T23:59:59.999Z");
 
-function formatRemainingTime(remainingMs: number) {
+export function formatRemainingTime(remainingMs: number) {
   const clampedMs = Math.max(0, remainingMs);
   const totalSeconds = Math.floor(clampedMs / 1000);
   const hours = Math.floor(totalSeconds / 3600);
@@ -43,6 +43,7 @@ export default function TurnOnTimer({
 }) {
   const [endAt, setEndAt] = useState(() => new Date(initialEnd));
   const [now, setNow] = useState(() => Date.now());
+  const [isHydrated, setIsHydrated] = useState(false);
   const [daysToSet, setDaysToSet] = useState("0");
   const [hoursToSet, setHoursToSet] = useState("0");
   const [minutesToSet, setMinutesToSet] = useState("15");
@@ -57,6 +58,8 @@ export default function TurnOnTimer({
   }, [initialEnd]);
 
   useEffect(() => {
+    setIsHydrated(true);
+    setNow(Date.now());
     const intervalId = window.setInterval(() => {
       setNow(Date.now());
     }, 1000);
@@ -121,7 +124,7 @@ export default function TurnOnTimer({
         <div className="tot-header">
           <div className="tot-label">Time remaining</div>
           <div className="tot-remaining">
-            {isPermanent ? "Permanent" : isExpired ? "00:00:00" : remainingText}
+            {!isHydrated ? "..." : isPermanent ? "Permanent" : isExpired ? "00:00:00" : remainingText}
           </div>
         </div>
 
@@ -194,7 +197,11 @@ export default function TurnOnTimer({
           </label>
 
           <button type="submit" className="tot-button" disabled={isSaving}>
-            {isSaving ? "Saving..." : isPermanent ? "Set permanent" : "Set end time"}
+            {isSaving
+              ? "Saving..."
+              : isPermanent
+                ? "Set permanent"
+                : "Set end time"}
           </button>
         </form>
       </div>

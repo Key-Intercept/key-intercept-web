@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-export default function RulesListItemButton({ onPressed, onHovered, square, children }: { onPressed?: () => void, onHovered?: (hovered: boolean, property?: any) => void, square?: boolean, children: React.ReactNode }) {
+export default function RulesListItemButton({ onPressed, onHovered, square, children }: { onPressed?: (e?: any) => void, onHovered?: (hovered: boolean, property?: any) => void, square?: boolean, children: React.ReactNode }) {
     const [hovered, setHovered] = useState(false);
     const [pressed, setPressed] = useState(false);
 
@@ -14,9 +14,11 @@ export default function RulesListItemButton({ onPressed, onHovered, square, chil
         onHovered && onHovered(false, buttonStyle);
     };
 
-    const handleClick = () => {
+    const handleClick = (e: React.MouseEvent) => {
+        e.stopPropagation();
+        // allow default where appropriate; only stop propagation for parent handlers
         setPressed(true);
-        onPressed && onPressed();
+        onPressed && onPressed(e);
         setTimeout(() => setPressed(false), 200); // Reset pressed state after a short delay
     };
 
@@ -42,6 +44,10 @@ export default function RulesListItemButton({ onPressed, onHovered, square, chil
         onMouseLeave={handleMouseLeave}
         onClick={handleClick}
         style={buttonStyle}
+        onPointerDown={(e) => {
+            // prevent the pointer event from bubbling up to parent drag handlers
+            e.stopPropagation();
+        }}
     >
         {children}
     </button>

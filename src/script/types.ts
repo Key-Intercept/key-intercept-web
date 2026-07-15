@@ -17,6 +17,15 @@ export type Config = {
   debug: boolean;
 };
 
+export type RuleGroup = {
+  id: bigint;
+  created_at: Date;
+  name: string;
+  config_id: bigint;
+  disabled_at: Date;
+  rules: Rule[];
+};
+
 export type Rule = {
   id: bigint;
   created_at: Date;
@@ -29,6 +38,7 @@ export type Rule = {
   chance_to_apply: number;
   label: string;
   order: number;
+  group_id: bigint | null;
 };
 
 export type WhitelistItem = {
@@ -37,6 +47,11 @@ export type WhitelistItem = {
   server_name: string;
   discord_id: string;
 };
+
+// Utility function to check if a group is enabled (not expired)
+export function isGroupEnabled(group: RuleGroup): boolean {
+  return Date.now() < group.disabled_at.getTime();
+}
 
 export type DroneConfig = {
   config_id: bigint;
