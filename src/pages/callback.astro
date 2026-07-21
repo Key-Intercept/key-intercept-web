@@ -53,10 +53,12 @@ import Layout from "../layouts/layout.astro";
                 }
 
                 if (data.session_token) {
-                    //store session token and user id in url params and redirect to configs page
-                    urlParams.append("ki-session", data.session_token);
-                    urlParams.append("ki-user", data.user.id);
-                    window.location.href = `/configs?${urlParams.toString()}`;
+                    // Store session token in URL and sessionStorage
+                    sessionStorage.setItem("ki-session", data.session_token);
+                    const params = new URLSearchParams();
+                    params.append("ki-session", data.session_token);
+                    // Redirect to configs page with session token only (no user ID)
+                    window.location.href = `/configs?${params.toString()}`;
                 }
                 // } catch (error) {
                 //     console.error("Login error:", error);

@@ -1,4 +1,9 @@
-import supabase from './supabase.js';
+import { createClient } from '@supabase/supabase-js';
+
+const supabase = createClient(
+  import.meta.env.SUPABASE_URL,
+  import.meta.env.SUPABASE_SERVICE_KEY
+);
 
 /**
  * Verify a session token from the Authorization header
@@ -31,24 +36,6 @@ export async function verifySessionToken(authHeader) {
     }
 
     return session.discord_id;
-}
-
-/**
- * Get internal user ID from Discord ID
- * Direct Supabase query - no HTTP calls, Vercel-compatible
- */
-export async function getUserIdFromDiscord(discordId) {
-    const { data: profile, error } = await supabase
-        .from('profiles')
-        .select('id')
-        .eq('discord_id', discordId)
-        .single();
-
-    if (error || !profile) {
-        throw new Error('User profile not found');
-    }
-
-    return profile.id;
 }
 
 /**

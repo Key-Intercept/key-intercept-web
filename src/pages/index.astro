@@ -15,7 +15,7 @@ import Button from "../components/button.astro";
 
 	const existingSession = sessionStorage.getItem("ki-session");
 	if (existingSession) {
-		window.location.href = REDIRECT_PATH;
+		window.location.href = "/configs";
 	}
 
 	const loginButton = document.getElementById("login-discord-btn");

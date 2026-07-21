@@ -4,9 +4,21 @@ export const prerender = false;
 import Layout from "../layouts/layout.astro";
 import Card from "../components/card.tsx";
 import ConfigSelect from "../components/config-select.tsx";
+import { verifySessionToken } from "../api/auth.js";
 
 const searchParams = Astro.url.searchParams;
-const discordID = searchParams.get("ki-user");
+const sessionToken = searchParams.get("ki-session");
+
+let discordID: string | null = null;
+
+if (sessionToken) {
+    try {
+        // Verify session token and extract discord_id
+        discordID = await verifySessionToken(`Bearer ${sessionToken}`);
+    } catch (error) {
+        console.error('[configs] Session verification failed:', error);
+    }
+}
 ---
 
 <Layout title={title}>
@@ -14,7 +26,7 @@ const discordID = searchParams.get("ki-user");
         {discordID ? (
             <ConfigSelect discordID={discordID} />
         ) : (
-            <p>Missing Discord user id in the request.</p>
+            <p>Missing or invalid session. Please log in again.</p>
         )}
     </Card>
 </Layout>
