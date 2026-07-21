@@ -6,7 +6,7 @@ const supabase = createClient(
 );
 
 /**
- * Verify a session token from the Authorization header
+ * Verify session token from Authorization header OR cookie
  * Direct Supabase query - no HTTP calls, Vercel-compatible
  */
 export async function verifySessionToken(authHeader) {
@@ -39,6 +39,30 @@ export async function verifySessionToken(authHeader) {
 }
 
 /**
+ * Extract session token from cookie header string
+ */
+export function getSessionTokenFromCookie(cookieHeader) {
+    if (!cookieHeader) return null;
+    const match = cookieHeader.match(/ki-session=([^;]+)/);
+    return match ? match[1] : null;
+}
+
+/**
+ * Verify session using cookie (for API routes)
+ * Throws if invalid or expired
+ */
+export async function verifySessionFromRequest(request) {
+    const cookieHeader = request.headers.get('cookie') || '';
+    const sessionToken = getSessionTokenFromCookie(cookieHeader);
+    
+    if (!sessionToken) {
+        throw new Error('No session found');
+    }
+
+    return await verifySessionToken(`Bearer ${sessionToken}`);
+}
+
+/**
  * Check if a user has access to a config
  * Direct Supabase query - no HTTP calls, Vercel-compatible
  */
@@ -59,4 +83,38 @@ export async function checkConfigAccess(userId, configId) {
     }
 
     return !!data;
+}
+
+/**
+ * Get internal user ID from Discord ID
+ * Direct Supabase query - no HTTP calls, Vercel-compatible
+ */
+export async function getUserIdFromDiscord(discordId) {
+    const { data: profile, error } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('discord_id', discordId)
+        .single();
+
+    if (error || !profile) {
+        throw new Error('User profile not found');
+    }
+
+    return profile.id;
+}
+
+/**
+ * Verify session and check authorization for a config (using Request)
+ * Returns user's internal ID if authorized, throws otherwise
+ */
+export async function verifyConfigAccessFromRequest(request, configId) {
+    const discordId = await verifySessionFromRequest(request);
+    const userId = await getUserIdFromDiscord(discordId);
+    const hasAccess = await checkConfigAccess(userId, configId);
+
+    if (!hasAccess) {
+        throw new Error('Access denied');
+    }
+
+    return userId;
 }

@@ -1,5 +1,6 @@
 ---
 const title = "Callback";
+export const prerender = false;
 import Layout from "../layouts/layout.astro";
 ---
 
@@ -22,50 +23,47 @@ import Layout from "../layouts/layout.astro";
 </style>
 
 <script>
-    window.onload = async () => {
-        const urlParams = new URLSearchParams(window.location.search);
-        const exisitingSession = urlParams.get("ki-session");
-        if (exisitingSession) {
-            window.location.href = "/configs";
-        } else {
+    const runCallbackFlow = async () => {
+        try {
+            const urlParams = new URLSearchParams(window.location.search);
+
             const code = urlParams.get("code");
-
-            if (code) {
-                window.history.replaceState(
-                    {},
-                    document.title,
-                    window.location.pathname,
-                );
-
-                // try {
-                const response = await fetch("/api/discord-login", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify({ code }),
-                });
-
-                const data = await response.json();
-
-                if (!response.ok) {
-                    throw new Error(data.error || "Login failed");
-                }
-
-                if (data.session_token) {
-                    // Store session token in URL and sessionStorage
-                    sessionStorage.setItem("ki-session", data.session_token);
-                    const params = new URLSearchParams();
-                    params.append("ki-session", data.session_token);
-                    // Redirect to configs page with session token only (no user ID)
-                    window.location.href = `/configs?${params.toString()}`;
-                }
-                // } catch (error) {
-                //     console.error("Login error:", error);
-                //     alert("Login failed. Please try again.");
-                //     window.location.href = "/";
-                // }
+            if (!code) {
+                window.location.replace("/");
+                return;
             }
+
+            window.history.replaceState({}, document.title, window.location.pathname);
+
+            const response = await fetch("/api/discord-login", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ code }),
+            });
+
+            const data = await response.json().catch(() => ({}));
+
+            if (!response.ok) {
+                throw new Error(data.error || "Login failed");
+            }
+
+            if (data.success) {
+                window.location.replace("/configs");
+                return;
+            }
+
+            throw new Error("Login failed");
+        } catch (error) {
+            console.error("Login error:", error);
+            window.location.replace("/");
         }
     };
+
+    if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", runCallbackFlow, { once: true });
+    } else {
+        void runCallbackFlow();
+    }
 </script>

@@ -47,10 +47,7 @@ export async function POST({ request }) {
         if (!tokenResponse.ok) {
             console.error("Discord Error Details:", JSON.stringify(tokenData, null, 2));
             return new Response(
-                JSON.stringify({
-                    error: "Discord refused the code",
-                    details: tokenData
-                }),
+                JSON.stringify({ error: "Authentication failed" }),
                 {
                     status: 400,
                     headers: { 'Content-Type': 'application/json' },
@@ -59,7 +56,8 @@ export async function POST({ request }) {
         }
 
         if (tokenData.error) {
-            return new Response(JSON.stringify({ error: tokenData }), {
+            console.error('Discord error:', tokenData.error);
+            return new Response(JSON.stringify({ error: "Authentication failed" }), {
                 status: 400,
                 headers: { 'Content-Type': 'application/json' },
             });
@@ -105,17 +103,28 @@ export async function POST({ request }) {
             });
         }
 
-        // Return the session token and user info
+        const isSecureRequest = new URL(request.url).protocol === 'https:';
+        const cookieParts = [
+            `ki-session=${sessionToken}`,
+            'HttpOnly',
+            'SameSite=Strict',
+            'Max-Age=604800',
+            'Path=/',
+        ];
+
+        if (isSecureRequest) {
+            cookieParts.push('Secure');
+        }
+
+        // Return success and set HTTP-only cookie
         return new Response(
-            JSON.stringify({
-                session_token: sessionToken,
-                user: {
-                    id: userData.id,
-                },
-            }),
+            JSON.stringify({ success: true }),
             {
                 status: 200,
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Set-Cookie': cookieParts.join('; '),
+                },
             }
         );
 

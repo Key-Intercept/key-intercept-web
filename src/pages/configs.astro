@@ -6,8 +6,9 @@ import Card from "../components/card.tsx";
 import ConfigSelect from "../components/config-select.tsx";
 import { verifySessionToken } from "../api/auth.js";
 
-const searchParams = Astro.url.searchParams;
-const sessionToken = searchParams.get("ki-session");
+const cookieHeader = Astro.request.headers.get("cookie") || "";
+const sessionMatch = cookieHeader.match(/ki-session=([^;]+)/);
+const sessionToken = sessionMatch ? sessionMatch[1] : null;
 
 let discordID: string | null = null;
 

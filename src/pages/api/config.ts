@@ -1,6 +1,7 @@
 import { createClient } from '@supabase/supabase-js';
 import type { APIRoute } from 'astro';
 import { serializeForSupabase } from '../../script/serializeForSupabase';
+import { verifyConfigAccessFromRequest } from '../../api/auth.js';
 
 export const prerender = false;
 
@@ -14,6 +15,20 @@ export const PUT: APIRoute = async ({ request }) => {
     const body = await request.json();
     const { id, ...updateData } = body;
 
+    if (!id) {
+      return new Response(JSON.stringify({ error: 'Missing id' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
+    }
+
+    // Verify authorization for this config
+    try {
+      await verifyConfigAccessFromRequest(request, id);
+    } catch (error: any) {
+      if (error.message === 'Access denied') {
+        return new Response(JSON.stringify({ error: 'Forbidden' }), { status: 403, headers: { 'Content-Type': 'application/json' } });
+      }
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401, headers: { 'Content-Type': 'application/json' } });
+    }
+
     if (updateData.rules_end) {
       updateData.rules_end = new Date(updateData.rules_end).toISOString();
     }
@@ -26,9 +41,13 @@ export const PUT: APIRoute = async ({ request }) => {
       .update(serializedUpdateData)
       .eq('id', serializedId);
 
-    if (error) return new Response(error.message, { status: 500 });
-    return new Response('OK', { status: 200 });
+    if (error) {
+      console.error('Config update error:', error);
+      return new Response(JSON.stringify({ error: 'Internal server error' }), { status: 500, headers: { 'Content-Type': 'application/json' } });
+    }
+    return new Response(JSON.stringify({ success: true }), { status: 200, headers: { 'Content-Type': 'application/json' } });
   } catch (err: any) {
-    return new Response(err.message, { status: 500 });
+    console.error('Config PUT error:', err);
+    return new Response(JSON.stringify({ error: 'Internal server error' }), { status: 500, headers: { 'Content-Type': 'application/json' } });
   }
 };

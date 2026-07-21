@@ -1,5 +1,6 @@
 ---
 const title = "Login";
+export const prerender = false;
 import Layout from "../layouts/layout.astro";
 import Card from "../components/card";
 import Button from "../components/button.astro";
@@ -12,11 +13,6 @@ import Button from "../components/button.astro";
 <script>
 	const CLIENT_ID = "1424790082690220052";
 	const REDIRECT_PATH = "/callback";
-
-	const existingSession = sessionStorage.getItem("ki-session");
-	if (existingSession) {
-		window.location.href = "/configs";
-	}
 
 	const loginButton = document.getElementById("login-discord-btn");
 	if (loginButton) {
