@@ -35,9 +35,6 @@ export const GET: APIRoute = async ({ request }) => {
     try {
       await verifyConfigAccessFromRequest(request, configId);
     } catch (error: any) {
-      if (error.message === "Access denied") {
-        return new Response(JSON.stringify({ error: "Forbidden" }), { status: 403, headers: { "Content-Type": "application/json" } });
-      }
       return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: { "Content-Type": "application/json" } });
     }
 
@@ -93,9 +90,6 @@ export const PUT: APIRoute = async ({ request }) => {
     try {
       await verifyConfigAccessFromRequest(request, config_id);
     } catch (error: any) {
-      if (error.message === "Access denied") {
-        return new Response(JSON.stringify({ error: "Forbidden" }), { status: 403, headers: { "Content-Type": "application/json" } });
-      }
       return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: { "Content-Type": "application/json" } });
     }
 
@@ -122,15 +116,24 @@ export const PUT: APIRoute = async ({ request }) => {
 export const POST: APIRoute = async ({ request }) => {
   try {
     const body = await request.json();
+
+    try {
+      await verifyConfigAccessFromRequest(request, body.config_id);
+    } catch (error: any) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: { "Content-Type": "application/json" } });
+    }
+
     const serializedBody = serializeForSupabase(body);
 
     const { error } = await supabase.from("Drone_Config").insert(serializedBody);
     if (error) {
-      return new Response(error.message, { status: 500 });
+      console.error("Drone POST error:", error);
+      return new Response(JSON.stringify({ error: "Internal server error" }), { status: 500, headers: { "Content-Type": "application/json" } });
     }
 
-    return new Response("OK", { status: 200 });
+    return new Response(JSON.stringify({ success: true }), { status: 200, headers: { "Content-Type": "application/json" } });
   } catch (err: any) {
-    return new Response(err.message, { status: 500 });
+    console.error("Drone POST error:", err);
+    return new Response(JSON.stringify({ error: "Internal server error" }), { status: 500, headers: { "Content-Type": "application/json" } });
   }
 };

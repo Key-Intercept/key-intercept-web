@@ -33,8 +33,25 @@ export default function RulesPageContainer({
   const [selectedGroup, setSelectedGroup] = useState<RuleGroup | null>(null);
   const currentConfigId = BigInt(initialConfigId);
 
+  function hydrateRule(record: any): Rule {
+    return {
+      id: BigInt(record.id),
+      created_at: new Date(record.created_at),
+      updated_at: new Date(record.updated_at),
+      config_id: BigInt(record.config_id),
+      rule_regex: new RegExp(record.rule_regex ?? ""),
+      rule_replacement: record.rule_replacement,
+      regex_normalize: record.regex_normalize,
+      enabled: record.enabled,
+      chance_to_apply: record.chance_to_apply,
+      label: record.label,
+      order: record.order,
+      group_id: record.group_id === null ? null : BigInt(record.group_id),
+    };
+  }
+
   async function deleteRuleDatabase(id: bigint) {
-    const res = await fetch(`/api/rules?id=${id}`, {
+    const res = await fetch(`/api/rules?id=${id}&config_id=${currentConfigId.toString()}`, {
       method: "DELETE",
     });
 
@@ -47,7 +64,10 @@ export default function RulesPageContainer({
   }
 
   async function deleteGroupDatabase(id: bigint) {
-    const res = await fetch(`/api/ruleGroups?id=${id}`, { method: "DELETE" });
+    const res = await fetch(
+      `/api/ruleGroups?id=${id}&config_id=${currentConfigId.toString()}`,
+      { method: "DELETE" },
+    );
 
     if (!res.ok) {
       console.error("Error deleting rule group:", await res.text());
@@ -80,7 +100,7 @@ export default function RulesPageContainer({
         "An error occurred while updating the rule. Please try again.",
       );
     }
-    if (rule.group_id === null) {
+    if (rule.group_id == null) {
       setLooseRules((prevRules) => {
         // Remove rule from any group it was in and add/replace in loose
         const exists = prevRules.some((r) => r.id === rule.id);
@@ -173,21 +193,26 @@ export default function RulesPageContainer({
     if (!res.ok) {
       console.error("Error adding new rule:", await res.text());
       await alert("An error occurred while adding the rule. Please try again.");
+      return;
     }
-    if (rule.group_id === null) {
+
+    const response = await res.json();
+    const createdRule = response?.rule ? hydrateRule(response.rule) : rule;
+
+    if (rule.group_id == null) {
       setLooseRules((prevRules) => {
-        const newRule = { ...rule, id: BigInt(-1) }; // Temporary ID until we get the real one from the server
-        return [...prevRules, newRule].sort((a, b) => a.order - b.order);
+        return [...prevRules, createdRule].sort((a, b) => a.order - b.order);
       });
     } else {
-      var output: RuleGroup[] = [...groups];
-      for (let i = 0; i < output.length; i++) {
-        if (output[i].id === rule.group_id) {
-          output[i].rules.push({ ...rule, id: BigInt(-1) });
-        }
-      }
-      setGroups(output);
+      setGroups((prevGroups) =>
+        prevGroups.map((group) =>
+          group.id === rule.group_id
+            ? { ...group, rules: [...group.rules, createdRule] }
+            : group,
+        ),
+      );
     }
+    setSelectedRule(null);
   }
 
   async function addNewGroupDatabase(group: RuleGroup) {
@@ -207,6 +232,7 @@ export default function RulesPageContainer({
     if (!res.ok) {
       console.error("Error adding new group:", await res.text());
       await alert("An error occured while adding the group. Please try again.");
+      return;
     }
     setGroups((prevGroups) => {
       const newGroup = { ...group, id: BigInt(-1) };

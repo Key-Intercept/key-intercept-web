@@ -23,9 +23,6 @@ export const PUT: APIRoute = async ({ request }) => {
     try {
       await verifyConfigAccessFromRequest(request, id);
     } catch (error: any) {
-      if (error.message === 'Access denied') {
-        return new Response(JSON.stringify({ error: 'Forbidden' }), { status: 403, headers: { 'Content-Type': 'application/json' } });
-      }
       return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401, headers: { 'Content-Type': 'application/json' } });
     }
 

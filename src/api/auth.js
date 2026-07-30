@@ -63,29 +63,6 @@ export async function verifySessionFromRequest(request) {
 }
 
 /**
- * Check if a user has access to a config
- * Direct Supabase query - no HTTP calls, Vercel-compatible
- */
-export async function checkConfigAccess(userId, configId) {
-  const { data, error } = await supabase
-    .from("Dom_Config_Access")
-    .select("id")
-    .eq("dom_id", userId)
-    .eq("config_id", configId)
-    .single();
-
-  if (error) {
-    // PGRST116 means no rows found
-    if (error.code === "PGRST116") {
-      return false;
-    }
-    //throw new Error("Failed to check access");
-  }
-
-  return !!data;
-}
-
-/**
  * Get internal user ID from Discord ID
  * Direct Supabase query - no HTTP calls, Vercel-compatible
  */
@@ -104,17 +81,9 @@ export async function getUserIdFromDiscord(discordId) {
 }
 
 /**
- * Verify session and check authorization for a config (using Request)
- * Returns user's internal ID if authorized, throws otherwise
+ * Verify session from request for API routes.
+ * Keep second arg for backward-compatible call sites.
  */
-export async function verifyConfigAccessFromRequest(request, configId) {
-  const discordId = await verifySessionFromRequest(request);
-  const userId = await getUserIdFromDiscord(discordId);
-  //const hasAccess = await checkConfigAccess(userId, configId);
-
-  //if (!hasAccess) {
-  //    throw new Error('Access denied');
-  //}
-
-  return userId;
+export async function verifyConfigAccessFromRequest(request, _configId) {
+  return await verifySessionFromRequest(request);
 }

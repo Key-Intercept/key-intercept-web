@@ -27,9 +27,6 @@ export const DELETE: APIRoute = async ({ request }) => {
     try {
       await verifyConfigAccessFromRequest(request, configId);
     } catch (error: any) {
-      if (error.message === 'Access denied') {
-        return new Response(JSON.stringify({ error: 'Forbidden' }), { status: 403, headers: { 'Content-Type': 'application/json' } });
-      }
       return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401, headers: { 'Content-Type': 'application/json' } });
     }
 
@@ -58,13 +55,13 @@ export const POST: APIRoute = async ({ request }) => {
     try {
       await verifyConfigAccessFromRequest(request, config_id);
     } catch (error: any) {
-      if (error.message === 'Access denied') {
-        return new Response(JSON.stringify({ error: 'Forbidden' }), { status: 403, headers: { 'Content-Type': 'application/json' } });
-      }
       return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401, headers: { 'Content-Type': 'application/json' } });
     }
 
-    const serializedBody = serializeForSupabase(insertData);
+    const serializedBody = serializeForSupabase({
+      ...insertData,
+      config_id,
+    });
 
     const { error } = await supabase.from('Censored_Words').insert(serializedBody);
     if (error) {

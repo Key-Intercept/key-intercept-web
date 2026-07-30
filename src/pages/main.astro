@@ -74,5 +74,5 @@ const initialGroups = groupsData ? groupsData.map((group) => ({
 ---
 
 <Layout title={title}>
-  <RulesPageContainer initialRules={initialRules} initialConfigId={configID.toString()} initialRulesEnd={initialRulesEnd} initialGroups={initialGroups} client:load />
+  <RulesPageContainer initialRules={initialRules} initialConfigId={configID.toString()} initialRulesEnd={initialRulesEnd} initialGroups={initialGroups} client:only="react" />
 </Layout>

@@ -55,6 +55,7 @@ export default function SelectedRule({
 			rule_replacement: "",
 			enabled: true,
 			order: 0,
+			group_id: null,
 		} as Rule)
 	}
 
@@ -67,6 +68,7 @@ export default function SelectedRule({
 			rule_replacement: "",
 			enabled: true,
 			order: 0,
+			group_id: null,
 		} as Rule;
 	}
 	const isNewRule = !i_selectedRule || i_selectedRule.id === -1n;
@@ -82,6 +84,7 @@ export default function SelectedRule({
 						  rule_replacement: "",
 						  enabled: true,
 						  order: 0,
+						  group_id: null,
 					  } as Rule),
 			);
 	}
@@ -97,6 +100,7 @@ export default function SelectedRule({
 						  rule_replacement: replacement,
 						  enabled: true,
 						  order: 0,
+						  group_id: null,
 					  } as Rule),
 			);
 	}
@@ -112,6 +116,7 @@ export default function SelectedRule({
 						  rule_replacement: "",
 						  enabled: true,
 						  order: 0,
+						  group_id: null,
 						  label: label,
 					  } as Rule),
 			);

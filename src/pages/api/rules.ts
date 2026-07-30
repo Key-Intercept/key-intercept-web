@@ -27,9 +27,6 @@ export const DELETE: APIRoute = async ({ request }) => {
     try {
       await verifyConfigAccessFromRequest(request, configId);
     } catch (error: any) {
-      if (error.message === 'Access denied') {
-        return new Response(JSON.stringify({ error: 'Forbidden' }), { status: 403, headers: { 'Content-Type': 'application/json' } });
-      }
       return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401, headers: { 'Content-Type': 'application/json' } });
     }
 
@@ -61,9 +58,6 @@ export const PUT: APIRoute = async ({ request }) => {
     try {
       await verifyConfigAccessFromRequest(request, config_id);
     } catch (error: any) {
-      if (error.message === 'Access denied') {
-        return new Response(JSON.stringify({ error: 'Forbidden' }), { status: 403, headers: { 'Content-Type': 'application/json' } });
-      }
       return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401, headers: { 'Content-Type': 'application/json' } });
     }
 
@@ -103,9 +97,6 @@ export const POST: APIRoute = async ({ request }) => {
     try {
       await verifyConfigAccessFromRequest(request, config_id);
     } catch (error: any) {
-      if (error.message === 'Access denied') {
-        return new Response(JSON.stringify({ error: 'Forbidden' }), { status: 403, headers: { 'Content-Type': 'application/json' } });
-      }
       return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401, headers: { 'Content-Type': 'application/json' } });
     }
 
@@ -114,14 +105,21 @@ export const POST: APIRoute = async ({ request }) => {
       insertData.rule_regex = insertData.rule_regex.source === '(?:)' ? '' : insertData.rule_regex.source;
     }
     
-    const serializedBody = serializeForSupabase(insertData);
+    const serializedBody = serializeForSupabase({
+      ...insertData,
+      config_id,
+    });
     
-    const { error } = await supabase.from('Rules').insert(serializedBody);
+    const { data, error } = await supabase
+      .from('Rules')
+      .insert(serializedBody)
+      .select('*')
+      .single();
     if (error) {
       console.error('Rules insert error:', error);
       return new Response(JSON.stringify({ error: 'Internal server error' }), { status: 500, headers: { 'Content-Type': 'application/json' } });
     }
-    return new Response(JSON.stringify({ success: true }), { status: 200, headers: { 'Content-Type': 'application/json' } });
+    return new Response(JSON.stringify({ success: true, rule: data }), { status: 200, headers: { 'Content-Type': 'application/json' } });
   } catch (err: any) {
     console.error('Rules POST error:', err);
     return new Response(JSON.stringify({ error: 'Internal server error' }), { status: 500, headers: { 'Content-Type': 'application/json' } });
