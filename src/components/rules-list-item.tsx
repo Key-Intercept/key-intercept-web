@@ -151,11 +151,14 @@ export default function RulesListItem({
       >
         ⋮⋮
       </div>
-      <RulesListItemButton square={true} onPressed={(e: any) => {
-        e?.stopPropagation();
-        e?.preventDefault();
-        onToggled(rule.id);
-      }}>
+      <RulesListItemButton
+        square={true}
+        onPressed={(e: any) => {
+          e?.stopPropagation();
+          e?.preventDefault();
+          onToggled(rule.id);
+        }}
+      >
         {effectivelyEnabled ? rule.order : "x"}
       </RulesListItemButton>
       <div style={textContainerStyle}>
@@ -177,7 +180,6 @@ export default function RulesListItem({
           }}
           onPointerDown={(e) => {
             e.stopPropagation();
-            e.preventDefault();
           }}
           onClick={(e) => e.stopPropagation()}
           style={EditChanceInputStyle}
